@@ -1,0 +1,9 @@
+node_modules
+static
+.dockerignore
+.gitignore
+types
+Dockerfile
+tsconfig.json
+dist
+logs
