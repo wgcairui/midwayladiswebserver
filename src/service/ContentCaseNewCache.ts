@@ -130,7 +130,7 @@ export class ContentCaseNewCache {
         const collection = `${en ? 'en' : ''}${table.toLocaleLowerCase()}${/s$/.test(table) ? '' : 's'}`
         console.log({ collection, en, table, isNews, SiteName, query });
         if (isNews) {
-            const model = getModelForClass(Case, { schemaOptions: { collection } })
+            const model = getModelForClass(table === 'Case' ? Case : New, { schemaOptions: { collection } })
             return await model.find().sort({ "data.time": -1 }).lean()
         }
         if (table === 'About') {
