@@ -128,24 +128,17 @@ export class ContentCaseNewCache {
 
         if (!table) throw new Error('argment table require')
         const collection = `${en ? 'en' : ''}${table.toLocaleLowerCase()}${/s$/.test(table) ? '' : 's'}`
-        // console.log({ collection, en, table, isNews, SiteName, query });
+        console.log({ collection, en, table, isNews, SiteName, query });
         if (isNews) {
             const model = getModelForClass(Case, { schemaOptions: { collection } })
-            const r = await model.find().sort({ "data.time": -1 }).lean()
-            //this.cache.set(hash, JSON.stringify(r), { ttl: 600 })
-            return r
+            return await model.find().sort({ "data.time": -1 }).lean()
         }
         if (table === 'About') {
             const model = getModelForClass(About)
-            const r = await model.find({ webSite: SiteName }).lean()
-            //this.cache.set(hash, JSON.stringify(r), { ttl: 60 })
-            return r
+            return await model.find({ webSite: SiteName }).lean()
         }
         const model = getModelForClass(this.dbs[table], { schemaOptions: { collection } })
-        const r = await model.find(query).lean()
-        //this.cache.set(hash, JSON.stringify(r), { ttl: 120 })
-        return r
-        //}
+        return await model.find(query).lean()
     }
 
     private getarg() {

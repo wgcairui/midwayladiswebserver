@@ -5,5 +5,4 @@ static
 types
 Dockerfile
 tsconfig.json
-dist
 logs

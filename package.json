@@ -13,8 +13,8 @@
     "ci": "npm run cov",
     "build": "midway-bin build -c",
     "check": "luckyeye",
-    "build:docker": "npm run build && sudo docker build -t midwayladiswebserver",
-    "start:docker": "sudo docker stop midwayladiswebserver && sudo docker rm midwayladiswebserver && sudo docker run -itd --name midwayladiswebserver --volume /home/cc/Web/midwayladiswebserver/static:/app/static midwayladiswebserver"
+    "build:docker": "npm run build && sudo docker build -t midwayladiswebserver .",
+    "run:docker": "sudo docker stop midwayladiswebserver && sudo docker rm midwayladiswebserver && sudo docker run -itd --name midwayladiswebserver -p 9007:9007 --volume /home/cc/Web/midwayladiswebserver/static:/app/static midwayladiswebserver"
   },
   "dependencies": {
     "@midwayjs/bootstrap": "^2.3.0",
