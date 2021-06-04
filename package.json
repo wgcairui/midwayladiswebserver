@@ -32,7 +32,7 @@
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "@midwayjs/cli": "^1.0.0",
+    "@midwayjs/cli": "^1.2.70",
     "@midwayjs/luckyeye": "^1.0.0",
     "@midwayjs/mock": "^2.3.0",
     "@types/cache-manager": "^3.4.0",

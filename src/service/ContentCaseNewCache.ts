@@ -76,6 +76,12 @@ export class ContentCaseNewCache {
         }
     }
 
+
+    async getRoutLinks(key: string) {
+        const model = getModelForClass(Router)
+        return await model.find({ title: { $regex: key } })
+    }
+
     /**
      * 获取新闻和案例文档的上下文链接
      * @param type 文档类型
