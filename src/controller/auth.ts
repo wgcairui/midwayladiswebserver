@@ -11,7 +11,7 @@ import { Docments } from "../service/docment"
  * 响应用户登录登出等操作
  */
 @Provide()
-@Controller("/auth")
+@Controller("/site/auth")
 export class AuthController {
     @Inject()
     ctx: Context
