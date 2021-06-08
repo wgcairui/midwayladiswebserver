@@ -12,7 +12,7 @@ export class UserService {
 
   @Init()
   async init() {
-    this.userModel = getModelForClass(User, { schemaOptions: { timestamps: true } })
+    this.userModel = getModelForClass<typeof User>(User, { schemaOptions: { timestamps: true } })
   }
   /**
    * 获取单个用户数据

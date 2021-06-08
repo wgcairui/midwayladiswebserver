@@ -22,7 +22,8 @@
       "@midwayjs/typegoose",
       "@midwayjs/core",
       "@midwayjs/koa",
-      "@midwayjs/decorator"
+      "@midwayjs/decorator",
+      "types-uart"
     ]
   },
   "exclude": [

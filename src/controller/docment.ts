@@ -1,6 +1,7 @@
-import { Body, Controller, Inject, Post, Provide } from "@midwayjs/decorator";
+import { ALL, Body, Controller, Inject, Post, Provide, Validate } from "@midwayjs/decorator";
 import { Context } from "@midwayjs/koa";
 import { ContentCaseNewCache } from "../service/ContentCaseNewCache";
+import { GetContent, SeachProducts } from "../dto/docment"
 
 /**
  *  响应文档查询请求
@@ -20,21 +21,18 @@ export class Docment {
      * @param link 
      */
     @Post("/GetContent")
-    async GetContent(@Body() link: string) {
-        const type = link.split("/")[1];
-        if (type === 'case' || type === 'news') {
-            return await this.ContentCaseNewCache.GetContentCtx(type, link)
-        } else throw new Error('不支持的操作')
+    @Validate()
+    async getContent(@Body(ALL) link: GetContent) {
+        return await this.ContentCaseNewCache.GetContentCtx(link.getType(), link.link)
     }
 
     /**
      * 搜索产品信息
      */
     @Post("/seachProducts")
-    async seachProducts(@Body() seach: string) {
-        if (typeof seach === 'string' && seach.length < 100) {
-            return await this.ContentCaseNewCache.seachProducts(seach)
-        } else throw new Error('查询字符出错')
+    @Validate()
+    async seachProducts(@Body(ALL) seach: SeachProducts) {
+        return await this.ContentCaseNewCache.seachProducts(seach.seach)
     }
 
     /**

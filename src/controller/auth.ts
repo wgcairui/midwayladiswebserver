@@ -1,8 +1,11 @@
-import { Provide, Inject, Controller, Post, ALL, Body } from "@midwayjs/decorator"
+import { Provide, Inject, Controller, Post, ALL, Body, Get, Query } from "@midwayjs/decorator"
 import { Context } from "@midwayjs/koa"
 import { UserInfo } from "../../types/typeing"
 import { UserService } from "../service/user"
-import { CryptoSecret } from "../service/util"
+import { CryptoSecret } from "../util/util"
+import { Rwxlogin } from "../dto/auth"
+import { WxOpen } from "../service/wxOpen"
+import { Docments } from "../service/docment"
 
 /**
  * 响应用户登录登出等操作
@@ -18,6 +21,12 @@ export class AuthController {
 
     @Inject()
     CryptoSecret: CryptoSecret
+
+    @Inject()
+    WxOpen: WxOpen
+
+    @Inject()
+    Docments: Docments
 
     /**
      * 用户登录
@@ -62,6 +71,33 @@ export class AuthController {
     @Post("/logout")
     async logout() {
         return { stat: true, msg: "success" }
+    }
+
+
+    /**
+     * 微信登录
+     * @param data 
+     */
+    @Get("/wxlogin")
+    async wxlogin(@Query(ALL) data: Rwxlogin) {
+        const openUser = await this.WxOpen.userInfo(data.code)
+        if (!openUser) throw new Error("login error")
+        const user = await this.UserService.getUser(openUser.openid)
+        if (user) {
+            const token = await this.CryptoSecret.Secret_JwtSign(user)
+            return { code: 200, token, user: user };
+        } else {
+            //  如果没有用户则返回
+            const agents = await this.Docments.getAgents()
+            return {
+                code: 2,
+                openUser,
+                content: agents.map(el => ({
+                    name: el.name,
+                    tels: el.contactTel.map(tel => parseInt(tel)).filter(tel => /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/.test(tel.toString()))
+                }))
+            }
+        }
     }
 
 }

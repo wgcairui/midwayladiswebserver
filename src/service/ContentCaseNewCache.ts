@@ -148,7 +148,7 @@ export class ContentCaseNewCache {
     }
 
     private getarg() {
-        const body = this.ctx.request.body as query
+        const body = this.ctx.request.body as unknown as query
         const SiteName = decodeURI(this.ctx.header.name as string)
         const queryKeySet = body?.queryKeys ? new Set(body.queryKeys) : new Set()
         const queryArr = Object.entries(body).filter(([key]) => queryKeySet.has(key)).map(el => ({ [el[0]]: el[1] }))

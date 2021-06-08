@@ -26,7 +26,13 @@ export class User {
     public Group: string
 
     @prop()
+    public avatar: string
+
+    @prop()
+    public company: string
+
+    @prop()
     public IP?: string
 
-    
+
 }
