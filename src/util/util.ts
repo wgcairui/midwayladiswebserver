@@ -1,12 +1,13 @@
 import { Provide } from "@midwayjs/decorator";
 import * as jsonwebtoken from "jsonwebtoken";
 import * as CryptoJS from "crypto-js";
+import axios from "axios"
 
 /**
  * 工具链
  */
 @Provide()
-export class CryptoSecret {
+export class Util {
     /**
      * token盐值
      */
@@ -91,5 +92,15 @@ export class CryptoSecret {
             padding: CryptoJS.pad.Pkcs7,
         });
         return encrypted.ciphertext.toString().toUpperCase();
+    }
+
+    /**
+     * 发送短信验证码
+     * @param tel 
+     */
+    async SendValidation(tel: string) {
+        return await axios.post<{ code: string, result: Uart.ApolloMongoResult }>("https://uart.ladishb.com/api/open/sendValidationSms", { tel:String(tel).trim() })
+            .then(data => data.data)
+
     }
 }

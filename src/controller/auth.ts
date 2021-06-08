@@ -1,8 +1,8 @@
-import { Provide, Inject, Controller, Post, ALL, Body, Get, Query } from "@midwayjs/decorator"
+import { Provide, Inject, Controller, Post, ALL, Body, Validate } from "@midwayjs/decorator"
 import { Context } from "@midwayjs/koa"
 import { UserInfo } from "../../types/typeing"
 import { UserService } from "../service/user"
-import { CryptoSecret } from "../util/util"
+import { Util } from "../util/util"
 import { Rwxlogin } from "../dto/auth"
 import { WxOpen } from "../service/wxOpen"
 import { Docments } from "../service/docment"
@@ -11,7 +11,7 @@ import { Docments } from "../service/docment"
  * 响应用户登录登出等操作
  */
 @Provide()
-@Controller("/site/auth")
+@Controller("/auth")
 export class AuthController {
     @Inject()
     ctx: Context
@@ -20,7 +20,7 @@ export class AuthController {
     UserService: UserService
 
     @Inject()
-    CryptoSecret: CryptoSecret
+    Util: Util
 
     @Inject()
     WxOpen: WxOpen
@@ -40,12 +40,9 @@ export class AuthController {
         if (!result) {
             throw new Error("用户未注册");
         }
-        if (!result.stat) {
-            throw new Error("账户未启用，请联系管理员启用");
-        }
-        if (result.passwd === this.CryptoSecret.Crypto_Encrypto(user.passwd)) {
+        if (result.passwd === this.Util.Crypto_Encrypto(user.passwd)) {
             result.passwd = ""
-            const token = await this.CryptoSecret.Secret_JwtSign(result)
+            const token = await this.Util.Secret_JwtSign(result.toJSON())
             return { token, user };
         } else {
             throw new Error("密码错误，请核对密码");
@@ -58,10 +55,11 @@ export class AuthController {
      */
     @Post("/user")
     async user() {
-        const token = this.ctx.cookies.get("token")
-        const tokenSlice = <string>token.split(" ")[1].trim()
-        const { user } = await this.CryptoSecret.Secret_JwtVerify<UserInfo>(tokenSlice)
-        return { user }
+        const token = this.ctx.cookies.get("auth._token.local")
+        if (!token) throw new Error('token is nothing')
+        const tokenSlice = <string>token.split("%20")[1].trim()
+        const { name } = await this.Util.Secret_JwtVerify<UserInfo>(tokenSlice)
+        return { user: name }
     }
 
     /**
@@ -78,13 +76,15 @@ export class AuthController {
      * 微信登录
      * @param data 
      */
-    @Get("/wxlogin")
-    async wxlogin(@Query(ALL) data: Rwxlogin) {
-        const openUser = await this.WxOpen.userInfo(data.code)
+    @Post("/wxlogin")
+    @Validate()
+    async wxlogin(@Body(ALL) data: Rwxlogin) {
+        if (!data.code) throw new Error("code error")
+        const openUser = await this.WxOpen.userInfo(data.code).catch(e => console.log(e))
         if (!openUser) throw new Error("login error")
         const user = await this.UserService.getUser(openUser.openid)
         if (user) {
-            const token = await this.CryptoSecret.Secret_JwtSign(user)
+            const token = await this.Util.Secret_JwtSign(user.toJSON())
             return { code: 200, token, user: user };
         } else {
             //  如果没有用户则返回
@@ -94,7 +94,15 @@ export class AuthController {
                 openUser,
                 content: agents.map(el => ({
                     name: el.name,
-                    tels: el.contactTel.map(tel => parseInt(tel)).filter(tel => /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/.test(tel.toString()))
+                    tels: el.contactTel
+                        .map(tel => {
+                            if (tel[0] === '1') {
+                                return parseInt(tel)
+                            } else {
+                                return 1 + tel.split("1")[1]
+                            }
+                        })
+                        .filter(tel => /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/.test(tel.toString()))
                 }))
             }
         }

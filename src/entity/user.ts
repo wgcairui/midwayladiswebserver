@@ -10,29 +10,14 @@ export class User {
     @prop()
     public passwd: string
 
-    @prop()
-    public tel?: number
-
-    @prop()
-    public mail?: string
-
-    @prop({ default: new Date() })
-    public DateTime: Date
-
-    @prop({ default: false })
-    public stat: boolean
-
     @prop({ default: "user" })
     public Group: string
 
     @prop()
-    public avatar: string
+    public avanter: string
 
     @prop()
     public company: string
-
-    @prop()
-    public IP?: string
 
 
 }

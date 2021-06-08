@@ -22,4 +22,13 @@ export class UserService {
   async getUser(user: string) {
     return await this.userModel.findOne({ $or: [{ user }, { mail: user }] })
   }
+
+  /**
+   * 添加用户
+   * @param user 
+   * @returns 
+   */
+  async saveUser(user: Uart.UserInfo) {
+    return await this.userModel.create(user as any)
+  }
 }

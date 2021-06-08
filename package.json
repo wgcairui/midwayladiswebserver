@@ -25,15 +25,17 @@
     "@midwayjs/koa": "^2.3.0",
     "@midwayjs/typegoose": "^2.10.14",
     "@typegoose/typegoose": "^7.6.0",
+    "axios": "^0.21.1",
     "cache-manager": "^3.4.3",
     "crypto-js": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
     "koa-bodyparser": "^4.3.0",
     "mongoose": "5.10.18",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "types-uart": "^1.0.20"
   },
   "devDependencies": {
-    "@midwayjs/cli": "^1.2.70",
+    "@midwayjs/cli": "^1.2.71",
     "@midwayjs/luckyeye": "^1.0.0",
     "@midwayjs/mock": "^2.3.0",
     "@types/cache-manager": "^3.4.0",
