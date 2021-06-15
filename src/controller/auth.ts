@@ -53,13 +53,9 @@ export class AuthController {
      * 获取用户名
      * @returns 
      */
-    @Post("/user")
-    async user() {
-        const token = this.ctx.cookies.get("auth._token.local")
-        if (!token) throw new Error('token is nothing')
-        const tokenSlice = <string>token.split("%20")[1].trim()
-        const { name } = await this.Util.Secret_JwtVerify<UserInfo>(tokenSlice)
-        return { user: name }
+    @Post("/user", { middleware: ['tokenParse'] })
+    async user(@Body() user: Uart.UserInfo) {
+        return { user: user.name }
     }
 
     /**

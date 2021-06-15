@@ -3,6 +3,9 @@
   "compilerOptions": {
     "target": "ES2018",
     "module": "commonjs",
+    "lib": [
+      "ES2019.Array"
+    ],
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

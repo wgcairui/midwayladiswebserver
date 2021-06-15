@@ -39,6 +39,7 @@ export interface GMpack {
     table?: DbTables;
     href?: string;
     link: string;
+    company?: string
 }
 // 公用链接格式
 export interface GMlink {

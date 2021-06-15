@@ -11,7 +11,7 @@ export class User {
     public passwd: string
 
     @prop({ default: "user" })
-    public Group: string
+    public userGroup: string
 
     @prop()
     public avanter: string

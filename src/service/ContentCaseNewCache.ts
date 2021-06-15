@@ -134,10 +134,30 @@ export class ContentCaseNewCache {
 
         if (!table) throw new Error('argment table require')
         const collection = `${en ? 'en' : ''}${table.toLocaleLowerCase()}${/s$/.test(table) ? '' : 's'}`
-        console.log({ collection, en, table, isNews, SiteName, query });
-        if (isNews) {
-            const model = getModelForClass(table === 'Case' ? Case : New, { schemaOptions: { collection } })
-            return await model.find().sort({ "data.time": -1 }).lean()
+        // console.log({ collection, en, table, isNews, SiteName, query });
+
+        if (table === 'News' || table === "Case") {
+            const model = table === 'Case' ? getModelForClass(Case) : getModelForClass(New)
+            if (isNews) {
+                const list = await model.find({ company: SiteName }).sort({ "data.time": -1 }).lean()
+                if (list.length === 0) return await model.find().sort({ "data.time": -1 }).lean()
+                else return list
+            } else {
+                const list = await model.find({ company: SiteName, ...query }).sort({ "data.time": -1 }).lean()
+                if (list.length === 0) {
+                    if ((await model.find({ company: SiteName })).length === 0) {
+                        return await model.find(query).sort({ "data.time": -1 }).lean()
+                    } else {
+                        return await model.find({ company: SiteName })
+                    }
+
+                }
+                else {
+                    return list
+                }
+            }
+
+
         }
         if (table === 'About') {
             const model = getModelForClass(About)

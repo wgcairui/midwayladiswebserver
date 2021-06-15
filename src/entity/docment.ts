@@ -106,13 +106,13 @@ export class Product extends DocmentBody {
  * 产品详情
  */
 export class Product_list extends DocmentBody {
-    @Prop()
+    @prop()
     public head: string
 
-    @Prop()
+    @prop()
     public body: string
 
-    @Prop({ type: () => [String] })
+    @prop({ type: () => [String] })
     public img: string[]
 }
 
@@ -197,7 +197,8 @@ export class VR extends Links {
  * 案例
  */
 export class Case extends Links {
-
+    @Prop()
+    public company?: string
 }
 
 /**
@@ -206,13 +207,17 @@ export class Case extends Links {
 export class Case_list extends DocmentBody {
     @Prop()
     public content: string
+
+    @Prop()
+    public company?: string
 }
 
 /**
  * 新闻
  */
 export class New extends Links {
-
+    @Prop()
+    public company?: string
 }
 
 /**
@@ -221,6 +226,9 @@ export class New extends Links {
 export class News_list extends DocmentBody {
     @Prop()
     public content: string
+
+    @Prop()
+    public company?: string
 }
 
 

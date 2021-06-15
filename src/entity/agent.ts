@@ -62,7 +62,7 @@ export class AgentConfig {
     public contact400: string
 
     @Prop({ type: () => [String] })
-    public tml: string
+    public tml: string[]
 
     @Prop({ default: true })
     public showProduct: boolean

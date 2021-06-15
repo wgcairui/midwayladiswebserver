@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Provide, Put } from "@midwayjs/decorator";
+import { Body, Controller, Get, Inject, Post, Provide } from "@midwayjs/decorator";
 import { parse, join } from "path"
 import { Context } from "@midwayjs/koa";
 import { FileDU } from "../service/file"
@@ -19,7 +19,7 @@ export class FileOprate {
      * @param name 
      * @returns 
      */
-    @Post("/file/rename")
+    @Post("/api/rename")
     async rename(@Body() path: string, @Body() name: string) {
         const { dir, ext } = parse(path)
         const newPath = join(__dirname, "../../static", dir, name + ext)
@@ -32,10 +32,39 @@ export class FileOprate {
      * @param path 
      * @returns 
      */
-    @Post("/file/delete")
-    async delete(@Body() path: string) {
+    @Post("/api/deletefile")
+    async deletefile(@Body() path: string) {
         const filepath = join(__dirname, "../../static", path)
-        return this.FileDU.deleteFile(filepath)
+        return {
+            code: 200,
+            data: await this.FileDU.deleteFile(filepath)
+        }
+    }
+
+    /**
+     * 获取上传文件列表
+     * @param name 
+     * @returns 
+     */
+    @Post("/api/getUploadFiles")
+    async getUploadFiles(@Body() @Body() name: string) {
+        return {
+            code: 200,
+            data: await this.FileDU.getFilelist("upload", name)
+        }
+    }
+
+    /**
+     * 上传文件
+     * @param data 
+     */
+    @Post("/uploads/files")
+    async uploads() {
+        const file = [this.ctx.request.files.file].flat()[0]
+        return {
+            code: 200,
+            data: await this.FileDU.upLoad(file)
+        }
     }
 
     /**
@@ -53,8 +82,4 @@ export class FileOprate {
         return fs.createReadStream(Path)
     }
 
-    @Put("/uploads")
-    async upload() {
-
-    }
 }

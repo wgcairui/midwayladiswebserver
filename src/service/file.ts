@@ -2,12 +2,18 @@ import { Provide } from "@midwayjs/decorator";
 import { join, dirname } from "path"
 import * as fs from "fs"
 import fetch from "node-fetch"
+import { promisify } from "util"
+import { fileDirList } from "../../types/typeing";
+import { File } from "formidable"
+
 
 /**
  * 检查文件链接,如果没有此文件,则链接到官网下载
  */
 @Provide()
 export class FileDU {
+
+
     async getFileStatAndDown(path: string) {
         const ladis = "http://www.ladis.com.cn";
         const enladis = "http://en.ladis.com.cn";
@@ -62,6 +68,32 @@ export class FileDU {
     }
 
     /**
+     * 获取文件列表
+     * @param path 
+     * @param name 
+     */
+    async getFilelist(path: string, filter: string) {
+        const dir = join(__dirname, "../../static", path);
+        // 转换callback to promise
+        const readdir = promisify(fs.readdir)
+        // 默认结果
+        const data: fileDirList = { files: [], size: 0, msg: "" }
+        const result = await readdir(dir).then(files => {
+            if (!filter || filter === "") {
+                data.files = files.map(file => `/${path}/${file}`);
+            } else {
+                data.files = files.filter(file => file.includes(filter)).map(file => `/${path}/${file}`);
+            }
+            data.size = data.files.length
+            return data
+        }).catch(e => {
+            data.msg = e.message
+            return data
+        })
+        return result
+    }
+
+    /**
      * 重命名文件
      * @param oldPath 
      * @param newPath 
@@ -104,4 +136,106 @@ export class FileDU {
             }
         }
     }
+
+    /**
+     * 上传文件
+     * @param file 
+     * @returns 
+     */
+    async upLoad(file: File) {
+        const uploadDir = join(__dirname, "../../static", "upload")
+        // 检查目录是否存在
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const name = `${new Date(file.lastModifiedDate).toLocaleDateString().replace(/( |:|:|\/)/g, "_")}_${file.name}`
+        const newPath = `${uploadDir}/${name}`
+
+        return await new Promise<Record<"name" | "path" | "size" | "type", string>>((resolve, reject) => {
+            fs.copyFile(file.path, newPath, err => {
+                fs.rm(file.path, err1 => {
+                    if (err1) console.error(`tempFile rm error, path:${file.path}`)
+                })
+                if (err) {
+                    reject(err)
+                }
+
+                resolve({
+                    name,
+                    path: newPath,
+                    size: file.size.toString(),
+                    type: file.type
+                })
+            })
+        })
+    }
+
+    /**
+     * 上传文件
+     * @param req req对象
+     * @param uploadDir 上传文件保存路径
+     * @returns 
+     */
+    /* private async Multiparty(req: IncomingMessage, uploadDir: string = "../../static/upload/") {
+         // 检查目录是否存在
+         if (!fs.existsSync(uploadDir)) {
+             fs.mkdirSync(uploadDir, { recursive: true });
+         }
+         // 新建mul...
+         const form = new multiparty.Form({ uploadDir });
+         // 构建 Pro
+         return new Promise((resolve, reject) => {
+             // 解析上传文件
+             form.parse(req, (err, fields: any, files) => {
+                 if (err) reject(err);
+                 console.log({err, fields, files});
+                 
+                 // fields携带的是附带信息,files是上传文件数组
+                 const Files: uploadFile[] = files.files
+                 const SaveFiles = Files.map(file => {
+                     //
+                     const flieNameNew = `${new Date().toLocaleDateString().replace(/( |:|:|\/)/g, "_")}_${file.originalFilename}`
+                     const newPath = file.path.replace(basename(file.path), flieNameNew)
+                     fs.renameSync(file.path, decodeURI(newPath))
+                     // 压缩图片
+                     //this.imageCompre(newPath)
+                     //获取文件路径相对链接
+                     const link = `/${uploadDir}/${flieNameNew}`
+                     return {
+                         originalFilename: file.originalFilename,
+                         name: flieNameNew,
+                         path: link,
+                         link: link,
+                         size: file.size
+                     };
+                 })
+                 resolve(SaveFiles)
+             });
+         });
+     } */
+
+    /**
+     * 压缩图片
+     * @param path 图片路径
+     * @returns 
+     */
+    /* async imageCompre(path: string) {
+        const ext = extname(path)
+        if (["png", "jpeg", "jpg", "git", "bmp"].includes(ext)) return false
+        try {
+            await imagemin([path], {
+                destination: dirname(path),
+                plugins: [
+                    imageminJpegtran(),
+                    imageminPngquant({
+                        quality: [0.6, 0.8]
+                    })
+                ]
+            });
+            return true
+        } catch (error) {
+            return false
+        }
+    } */
 }
