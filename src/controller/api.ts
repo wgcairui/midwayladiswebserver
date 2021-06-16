@@ -53,8 +53,8 @@ export class APIController {
   @Post("/sendValidationSms")
   async sendValidationSms(@Body() tel: string, @Body() id: string) {
     return await this.Util.SendValidation(tel)
-      .then(data => {
-        this.Cache.set(id + tel, data.code, { ttl: 120 })
+      .then(async data => {
+        await this.Cache.cache.set(id, data.code, { ttl: null })
         return {
           code: 200,
           data: data.result
@@ -72,9 +72,10 @@ export class APIController {
    */
   @Post("/validationSmsCode")
   async validationSmsCode(@Body() code: string, @Body() openUser: Uart.WX.webUserInfo, @Body() tel: string, @Body() company: string) {
-    const codes = await this.Cache.get(openUser.openid + tel)
+    const codes = await this.Cache.cache.get(openUser.openid)
     const agent = (await this.Docments.getAgents(company))[0]
     if (agent && agent.contactTel.some(el => parseInt(el) === parseInt(tel)) && codes && codes === code) {
+      this.Cache.cache.del(openUser.openid)
       const result = await this.userService.saveUser({
         name: openUser.nickname,
         user: openUser.openid,
@@ -92,6 +93,7 @@ export class APIController {
         token: await this.Util.Secret_JwtSign(result.toJSON())
       }
     } else {
+
       return {
         code: 0,
         msg: 'code 已失效或流程出错'

@@ -13,6 +13,6 @@ export const cache = {
     store: "memory",
     options: {
         max: 1000,
-        ttl: 60
+        ttl: 6000
     }
 }

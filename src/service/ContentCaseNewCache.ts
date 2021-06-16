@@ -106,7 +106,7 @@ export class ContentCaseNewCache {
             }
             cacheData = await this.cache.get(type + doc._id)
         }
-        const ids = [Types.ObjectId(cacheData.pre), Types.ObjectId(cacheData.next)]
+        const ids = [Types.ObjectId(cacheData?.pre || doc._id), Types.ObjectId(cacheData?.next || doc._id)]
         const m = await model.find({ _id: { $in: ids } }, { link: 1, text: 1 })
         return {
             pre: m[0],
