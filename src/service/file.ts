@@ -5,6 +5,7 @@ import fetch from "node-fetch"
 import { promisify } from "util"
 import { fileDirList } from "../../types/typeing";
 import { File } from "formidable"
+import * as rmf from "rimraf"
 
 
 /**
@@ -117,24 +118,25 @@ export class FileDU {
      * @returns 
      */
     async deleteFile(filepath: string) {
-        try {
+        return new Promise((resolve) => {
             const filestat = fs.statSync(filepath)
             if (filestat.isDirectory()) {
-                fs.rmdirSync(filepath)
+                rmf(filepath, err => {
+                    resolve({
+                        code: err ? 0 : 200,
+                        err
+                    })
+                })
             } else {
-                fs.rmSync(filepath)
+                fs.rm(filepath, err => {
+                    resolve({
+                        code: err ? 0 : 200,
+                        err
+                    })
+                })
             }
-            return {
-                code: 200,
-                msg: "success"
-            }
-        } catch (error) {
-            return {
-                code: 0,
-                msg: "操作错误",
-                error
-            }
-        }
+        })
+
     }
 
     /**

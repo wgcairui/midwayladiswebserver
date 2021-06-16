@@ -19,8 +19,14 @@ export class FileOprate {
      * @param name 
      * @returns 
      */
-    @Post("/api/rename")
-    async rename(@Body() path: string, @Body() name: string) {
+    @Post("/api/rename", { middleware: ["tokenParse"] })
+    async rename(@Body() user: Uart.UserInfo, @Body() path: string, @Body() name: string) {
+        if (user.userGroup !== 'admin') {
+            return {
+                code: 0,
+                msg: 'user error'
+            }
+        }
         const { dir, ext } = parse(path)
         const newPath = join(__dirname, "../../static", dir, name + ext)
         const oldPath = join(__dirname, "../../static", path)
@@ -32,8 +38,14 @@ export class FileOprate {
      * @param path 
      * @returns 
      */
-    @Post("/api/deletefile")
-    async deletefile(@Body() path: string) {
+    @Post("/api/deletefile", { middleware: ["tokenParse"] })
+    async deletefile(@Body() user: Uart.UserInfo, @Body() path: string) {
+        if (user.userGroup !== 'admin') {
+            return {
+                code: 0,
+                msg: 'user error'
+            }
+        }
         const filepath = join(__dirname, "../../static", path)
         return {
             code: 200,
