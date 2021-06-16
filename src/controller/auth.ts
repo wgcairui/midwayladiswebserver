@@ -90,7 +90,7 @@ export class AuthController {
                 openUser,
                 content: agents.map(el => ({
                     name: el.name,
-                    tels: el.contactTel
+                    tels: (el.contactTel || [])
                         .map(tel => {
                             if (tel[0] === '1') {
                                 return parseInt(tel)
