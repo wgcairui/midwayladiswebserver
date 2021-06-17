@@ -1,12 +1,13 @@
-import { prop, Prop, Ref } from "@typegoose/typegoose";
+import { prop, Prop, Ref, modelOptions } from "@typegoose/typegoose";
 /**
  * 文档统一格式
  */
+@modelOptions({ schemaOptions: { timestamps: true } })
 class DocmentBody {
     /**
      * 页面标题
      */
-    @Prop({ trim: true })
+    @Prop({ trim: true, index: true })
     public PageTitle: string
 
     /**
@@ -42,7 +43,7 @@ class DocmentBody {
     /**
      * 文档标题
      */
-    @Prop({ trim: true })
+    @Prop({ trim: true, index: true })
     public title?: string
 
     /**
@@ -64,7 +65,7 @@ class DocmentBody {
     /**
      * 文档url链接
      */
-    @Prop()
+    @Prop({ index: true, required: true })
     public link: string
 }
 
@@ -236,6 +237,7 @@ export class News_list extends DocmentBody {
 /**
  * 网站相关
  */
+ @modelOptions({ schemaOptions: { timestamps: true } })
 export class About {
     @Prop()
     public webSite: string
@@ -260,6 +262,7 @@ export class Page extends DocmentBody {
 /**
  * 路由链接
  */
+ @modelOptions({ schemaOptions: { timestamps: true } })
 export class Router {
     @Prop()
     public title: string

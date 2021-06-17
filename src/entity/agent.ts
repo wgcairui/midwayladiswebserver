@@ -1,8 +1,9 @@
-import { Prop } from "@typegoose/typegoose";
+import { Prop, modelOptions } from "@typegoose/typegoose";
 
 /**
  * 友情链接
  */
+@modelOptions({ schemaOptions: { timestamps: true } })
 export class LinkFrend {
     @Prop()
     public name: string
@@ -15,12 +16,13 @@ export class LinkFrend {
 /**
  * 代理商网站运行配置
  */
+@modelOptions({ schemaOptions: { timestamps: true } })
 export class AgentConfig {
-    @Prop()
-    public name: string
+    @Prop({ index: true })
+    public name!: string
 
     @Prop()
-    public url: string
+    public url!: string
 
     @Prop({ default: true })
     public share: boolean
@@ -29,7 +31,7 @@ export class AgentConfig {
     public port: number
 
     @Prop()
-    public hm: string
+    public hm?: string
 
     @Prop()
     public logoType: string
@@ -38,10 +40,10 @@ export class AgentConfig {
     public logoValue: string
 
     @Prop()
-    public beian: string
+    public beian?: string
 
     @Prop()
-    public wangan: string
+    public wangan?: string
 
     @Prop()
     public title: string
@@ -53,15 +55,15 @@ export class AgentConfig {
     public metaDescription: string
 
     @Prop()
-    public contactQQ: string
+    public contactQQ?: string
 
-    @Prop({ type: () => [String] })
+    @Prop({ type: () => [String], default: [] })
     public contactTel: string[]
 
     @Prop()
-    public contact400: string
+    public contact400?: string
 
-    @Prop({ type: () => [String] })
+    @Prop({ type: () => [String], default: [] })
     public tml: string[]
 
     @Prop({ default: true })

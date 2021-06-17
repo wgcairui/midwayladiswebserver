@@ -1,7 +1,8 @@
-import { prop } from "@midwayjs/typegoose"
+import { prop, modelOptions } from "@midwayjs/typegoose"
 
+@modelOptions({ schemaOptions: { timestamps: true } })
 export class User {
-    @prop({ type: String, required: true })
+    @prop({ required: true, index: true })
     public user: string
 
     @prop()

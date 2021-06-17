@@ -5,7 +5,7 @@ import { BeAnObject } from "@typegoose/typegoose/lib/types";
 import { buyList, caseList, cases, product, productList, support, supportList } from "../../types/typeing";
 import { AgentConfig, LinkFrend } from "../entity/agent";
 import { Crawler } from "../util/crawler"
-import { Buy, Buy_list, Case, Case_list, New, News_list, Product, Product_list, Support, Support_list, Router, VR } from "../entity/docment";
+import { Buy, Buy_list, Case, Case_list, New, News_list, Product, Product_list, Support, Support_list, Router, VR, About, Page } from "../entity/docment";
 
 
 /**
@@ -17,24 +17,25 @@ import { Buy, Buy_list, Case, Case_list, New, News_list, Product, Product_list, 
 export class Docments {
 
     @Inject()
-    Crawler: Crawler
+    private Crawler: Crawler
 
-
-
-    agentModel: ReturnModelType<typeof AgentConfig, BeAnObject>
-    newsModel: ReturnModelType<typeof New, BeAnObject>;
-    newListModel: ReturnModelType<typeof News_list, BeAnObject>;
-    caseModel: ReturnModelType<typeof Case, BeAnObject>;
-    caseListModel: ReturnModelType<typeof Case_list, BeAnObject>;
-    buyModel: ReturnModelType<typeof Buy, BeAnObject>;
-    buyListModel: ReturnModelType<typeof Buy_list, BeAnObject>;
-    linkModel: ReturnModelType<typeof LinkFrend, BeAnObject>;
-    supportModel: ReturnModelType<typeof Support, BeAnObject>;
-    supportListModel: ReturnModelType<typeof Support_list, BeAnObject>;
-    productModel: ReturnModelType<typeof Product, BeAnObject>;
-    productListModel: ReturnModelType<typeof Product_list, BeAnObject>;
-    routeModel: ReturnModelType<typeof Router, BeAnObject>;
-    vrModel: ReturnModelType<typeof VR, BeAnObject>;
+    private agentModel: ReturnModelType<typeof AgentConfig, BeAnObject>
+    private newsModel: ReturnModelType<typeof New, BeAnObject>;
+    private newListModel: ReturnModelType<typeof News_list, BeAnObject>;
+    private caseModel: ReturnModelType<typeof Case, BeAnObject>;
+    private caseListModel: ReturnModelType<typeof Case_list, BeAnObject>;
+    private buyModel: ReturnModelType<typeof Buy, BeAnObject>;
+    private buyListModel: ReturnModelType<typeof Buy_list, BeAnObject>;
+    private linkModel: ReturnModelType<typeof LinkFrend, BeAnObject>;
+    private supportModel: ReturnModelType<typeof Support, BeAnObject>;
+    private supportListModel: ReturnModelType<typeof Support_list, BeAnObject>;
+    private productModel: ReturnModelType<typeof Product, BeAnObject>;
+    private productListModel: ReturnModelType<typeof Product_list, BeAnObject>;
+    private routeModel: ReturnModelType<typeof Router, BeAnObject>;
+    private vrModel: ReturnModelType<typeof VR, BeAnObject>;
+    private aboutModel: ReturnModelType<typeof About, BeAnObject>;
+    private pageModel: ReturnModelType<typeof Page, BeAnObject>;
+    private pick: { [x: string]: number };
 
     @Init()
     async init() {
@@ -56,6 +57,12 @@ export class Docments {
         this.routeModel = getModelForClass(Router)
 
         this.vrModel = getModelForClass(VR)
+
+        this.aboutModel = getModelForClass(About)
+
+        this.pageModel = getModelForClass(Page)
+
+        this.pick = { date: 0, table: 0, __v: 0, _id: 0, MainParent: 0, MainTitle: 0, MainUrl: 0 }
     }
 
     /**
@@ -496,4 +503,219 @@ export class Docments {
 
         return { time: Date.now() - now }//{ productData, supports }
     }
+
+
+    // -----------------------
+
+    /**
+     * 以下是代理商网站专用的api
+     * 
+     */
+
+    /**
+     * 获取代理商关于信息
+     * @param site 
+     * @param type 
+     * @returns 
+     */
+    getAboutType(name: string, type: string) {
+        return this.aboutModel.findOne({ webSite: name, type }, { content: 1 }).lean()
+    }
+
+    /**
+     * 获取所有路由
+     * @returns 
+     */
+    getRout() {
+        return this.routeModel.find({}).lean()
+    }
+
+    /**
+     * 获取所有vr列表
+     * @returns 
+     */
+    getVrs() {
+        return this.vrModel.find({}, this.pick).lean()
+    }
+
+    /**
+     * 获取vr页面
+     * @param link 
+     * @returns 
+     */
+    getVr(link: string) {
+        return this.vrModel.findOne({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取所有经销商详细信息
+     * @returns 
+     */
+    getBuysAll() {
+        return this.buyModel.find({}, this.pick).lean()
+    }
+
+    /**
+     * 获取指定的经销商信息
+     * @param link 
+     * @returns 
+     */
+    getBuyListLink(link: string) {
+        return this.buyListModel.find({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取所有案例列表
+     * @param company 
+     */
+    async getCaseLists(company: string) {
+        const data = await this.caseModel.find({ company }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        if (data.length > 0) {
+            return data
+        } else {
+            return await this.caseModel.find({}, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        }
+    }
+
+    /**
+     * 获取指定类型案例列表
+     * @param company 
+     */
+    async getCaseListsType(company: string, type: string) {
+        const data = await this.caseModel.find({ company }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        if (data.length > 0) {
+            return data.filter(el => el.MainTitle === type)
+        } else {
+            return await this.caseModel.find({ MainTitle: type }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 })
+        }
+    }
+
+    /**
+     * 获取指定案例
+     * @param link 
+     * @returns 
+     */
+    getCaselist(link: string) {
+        return this.caseListModel.findOne({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取所有新闻列表
+     * @param company 
+     */
+    async getNewsLists(company: string) {
+        const data = await this.newsModel.find({ company }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        if (data.length > 0) {
+            return data
+        } else {
+            return await this.newsModel.find({}, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        }
+    }
+
+    /**
+     * 获取指定类型新闻列表
+     * @param company 
+     */
+    async getNewsListsType(company: string, type: string) {
+        const data = await this.newsModel.find({ company }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        if (data.length > 0) {
+            return data.filter(el => el.MainTitle === type)
+        } else {
+            return await this.newsModel.find({ MainTitle: type }, { text: 1, img: 1, name: 1, time: 1, link: 1, _id: 0 }).lean()
+        }
+    }
+
+    /**
+     * 获取指定新闻
+     * @param link 
+     * @returns 
+     */
+    getNewslist(link: string) {
+        return this.newListModel.findOne({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取指定产品列表
+     * @param type 
+     * @returns 
+     */
+    getProductsType(type: string) {
+        return this.productModel.find({ MainTitle: type }, this.pick).lean()
+    }
+
+    /**
+     * 查询匹配产品信息
+     * @param str 通配符
+     * @returns 
+     */
+    getProductsReg(str: string) {
+        const regstr = eval('/' + str + '/i')
+        return this.productModel.find({ "$or": [{ "Pagekeywords": regstr }, { "title": regstr }] }, this.pick).lean()
+    }
+
+    /**
+     * 获取指定产品信息
+     * @param link 
+     * @returns 
+     */
+    getProductList(link: string) {
+        return this.productListModel.findOne({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取侧边栏
+     * @param type 
+     * @returns 
+     */
+    getPagesType(type: string) {
+        return this.pageModel.find({ MainTitle: type }, this.pick).lean()
+    }
+
+    /**
+     * 获取下载支持
+     * @param type 
+     * @returns 
+     */
+    getSupportType(type: string) {
+        // const obj = Object.assign(this.pick,{MainTitle: 1})
+        return this.supportModel.find({ MainParent: type }).lean()
+    }
+
+    /**
+     * 获取教程支持
+     * @param type 
+     * @returns 
+     */
+    getSupportListsType(type: string) {
+        return this.supportListModel.find({ MainUrl: type }, this.pick).lean()
+    }
+
+    /**
+     * 获取
+     * @returns 
+     */
+    getSupportLists() {
+        return this.supportListModel.find({}, this.pick).lean()
+    }
+
+
+    /**
+     * 获取支持单例
+     * @param link 
+     * @returns 
+     */
+    getSupportList(link: string) {
+        return this.supportListModel.findOne({ link }, this.pick).lean()
+    }
+
+    /**
+     * 获取支持单例
+     * @param link 
+     * @returns 
+     */
+    getSupport(link: string) {
+        return this.supportModel.findOne({ link }, this.pick).lean()
+    }
+
+
 }
