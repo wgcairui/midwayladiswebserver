@@ -11,9 +11,6 @@ export class HomeController {
   @Get('/')
   @Post("/")
   async home() {
-    const a = await this.UserService.getUser("admin")
-    console.log(a);
-
     return 'Hello Midwayjs!';
   }
 }
