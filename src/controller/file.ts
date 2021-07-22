@@ -3,6 +3,8 @@ import { parse, join } from "path"
 import { Context } from "@midwayjs/koa";
 import { FileDU } from "../service/file"
 
+import { existsSync, createReadStream } from "fs"
+
 @Provide()
 @Controller()
 export class FileOprate {
@@ -89,9 +91,22 @@ export class FileOprate {
     @Get("/a_images/*")
     @Get("/docment/Down")
     async file() {
-        const { stat, Path, fs } = await this.FileDU.getFileStatAndDown(this.ctx.originalUrl)
-        if (!stat) throw new Error(Path + " is no file")
-        return fs.createReadStream(Path)
+
+        if (/^(\/upload|\/docment)/.test(this.ctx.path)) {
+            const path = join(process.cwd(), this.ctx.path)
+            // 如果存在文件
+            if (existsSync(path)) {
+                return createReadStream(path)
+            } else {
+                throw new Error(path + " is no file")
+            }
+        } else {
+
+            const { stat, Path } = await this.FileDU.getFileStatAndDown(this.ctx.originalUrl)
+            if (!stat) this.ctx.throw(Path + " is no file2")
+            return createReadStream(Path)
+        }
+
     }
 
 }
