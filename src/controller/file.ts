@@ -93,7 +93,7 @@ export class FileOprate {
     async file() {
 
         if (/^(\/upload|\/docment)/.test(this.ctx.path)) {
-            const path = join(process.cwd(), this.ctx.path)
+            const path = join(process.cwd(), "static", decodeURI(this.ctx.path))
             // 如果存在文件
             if (existsSync(path)) {
                 return createReadStream(path)

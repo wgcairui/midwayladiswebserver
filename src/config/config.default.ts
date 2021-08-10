@@ -5,7 +5,8 @@ export const mongoose: DefaultConfig = {
     options: {
         dbName: "ladis",
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        useCreateIndex: true
     }
 }
 
