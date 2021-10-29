@@ -40,9 +40,11 @@ export class FileOprate {
       };
     }
     const { dir, ext } = parse(path);
-    const newPath = join(__dirname, '../../static', dir, name + ext);
-    const oldPath = join(__dirname, '../../static', path);
-    return await this.FileDU.rename(newPath, oldPath);
+    const dirs = join(process.cwd(), "static")
+
+    const newPath = join(dirs, dir, name + ext);
+    const oldPath = join(dirs, path);
+    return await this.FileDU.rename(oldPath, newPath);
   }
 
   /**

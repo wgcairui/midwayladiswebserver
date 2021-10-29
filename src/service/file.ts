@@ -1,6 +1,7 @@
 import { Provide } from '@midwayjs/decorator';
 import { join, dirname } from 'path';
 import * as fs from 'fs';
+import { rename } from "fs/promises"
 import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { fileDirList } from '../../types/typeing';
@@ -95,11 +96,8 @@ export class FileDU {
    * @returns
    */
   async rename(oldPath: string, newPath: string) {
-    const err = await new Promise(resolve => {
-      fs.rename(oldPath, newPath, err => {
-        resolve(err);
-      });
-    });
+
+    const err = await rename(oldPath, newPath).catch(err => err)
     return {
       code: err ? 0 : 200,
       msg: err,
