@@ -5,7 +5,6 @@ export interface IUserOptions {
   uid: number;
 }
 
-
 export interface JoinPoint {
   methodName: string;
   target: any;
