@@ -511,6 +511,7 @@ export class APIController {
    * @param buy
    * @returns
    */
+  @Post('/setBuy')
   async setBuy(@Body() buy: buyList) {
     return {
       code: 200,
