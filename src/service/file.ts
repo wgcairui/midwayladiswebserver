@@ -1,7 +1,7 @@
 import { Provide } from '@midwayjs/decorator';
 import { join, dirname } from 'path';
 import * as fs from 'fs';
-import { rename } from "fs/promises"
+import { rename } from 'fs/promises';
 import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { fileDirList } from '../../types/typeing';
