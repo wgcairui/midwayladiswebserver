@@ -103,6 +103,10 @@ export class FileOprate {
   @Get('/a_images/*')
   @Get('/docment/Down')
   async file() {
+    if(Object.keys(this.ctx.query||{}).length>0){
+      console.log(this.ctx.query);
+      this.ctx.throw('please check url', 404 )
+    }
     if (/^(\/upload|\/docment)/.test(this.ctx.path)) {
       const path = join(process.cwd(), 'static', decodeURI(this.ctx.path));
       // 如果存在文件

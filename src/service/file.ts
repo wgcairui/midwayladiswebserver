@@ -27,13 +27,14 @@ export class FileDU {
     if (!fs.existsSync(filePath)) {
       const Path = dirname(filePath);
       // 判断文件夹是否存在，不存在则创建
-      if (!fs.existsSync(Path)) fs.mkdirSync(Path, { recursive: true });
 
       await fetch(ladis + encodeURI(path))
         .then(async ({ status, body }) => {
           // console.log({ status, url: ladis + encodeURI(path) });
 
           if (status === 200) {
+            if (!fs.existsSync(Path)) fs.mkdirSync(Path, { recursive: true });
+
             // 创建文件写入流
             const fsStream = fs.createWriteStream(filePath);
             // 创建一个promise，监听到stream关闭返回true
