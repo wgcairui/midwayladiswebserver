@@ -103,6 +103,8 @@ export class FileOprate {
   @Get('/a_images/*')
   @Get('/docment/Down')
   async file() {
+    // if query = xml: '../../../../../../../../../etc/passwd'
+    // client can download passwd file of url
     if(Object.keys(this.ctx.query||{}).length>0){
       console.log(this.ctx.query);
       this.ctx.throw('please check url', 404 )
