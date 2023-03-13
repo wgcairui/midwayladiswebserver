@@ -4,12 +4,12 @@ import * as bodyParser from 'koa-body';
 import { ILifeCycle } from '@midwayjs/core';
 import * as typegoose from '@midwayjs/typegoose';
 import * as cache from '@midwayjs/cache';
-import * as crossDomain from '@midwayjs/cross-domain';
 import { join } from 'path';
+import * as cors from '@koa/cors';
 
 @Configuration({
   conflictCheck: true,
-  imports: [typegoose, cache, crossDomain],
+  imports: [typegoose, cache],
   importConfigs: [join(__dirname, './config')],
 })
 export class ContainerLifeCycle implements ILifeCycle {
@@ -25,6 +25,12 @@ export class ContainerLifeCycle implements ILifeCycle {
         formidable: {
           maxFileSize: 1024 * 1024 * 100 * 100,
         },
+      })
+    );
+
+    this.app.use(
+      cors({
+        origin: '*',
       })
     );
   }
