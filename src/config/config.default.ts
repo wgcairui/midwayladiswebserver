@@ -20,3 +20,12 @@ export const cache = {
     ttl: 6000,
   },
 };
+
+
+export const cors = {
+  // 设置 Access-Control-Allow-Origin 的值，【默认值】会获取请求头上的 origin
+  // 也可以配置为一个回调方法，传入的参数为 request，需要返回 origin 值
+  // 例如：http://test.midwayjs.org
+  // 如果设置了 credentials，则 origin 不能设置为 *
+  origin: '*',
+}

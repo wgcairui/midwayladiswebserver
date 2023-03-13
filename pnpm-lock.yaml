@@ -6,6 +6,7 @@ specifiers:
   '@midwayjs/cache': ^2.13.4
   '@midwayjs/cli': ^1.2.71
   '@midwayjs/core': ^2.13.4
+  '@midwayjs/cross-domain': ^3.10.15
   '@midwayjs/decorator': ^2.13.2
   '@midwayjs/koa': ^2.13.4
   '@midwayjs/luckyeye': ^1.0.0
@@ -41,6 +42,7 @@ dependencies:
   '@midwayjs/bootstrap': 2.14.6
   '@midwayjs/cache': 2.14.6
   '@midwayjs/core': 2.14.6_@midwayjs+decorator@2.14.0
+  '@midwayjs/cross-domain': 3.10.15
   '@midwayjs/decorator': 2.14.0
   '@midwayjs/koa': 2.14.6_@midwayjs+decorator@2.14.0
   '@midwayjs/typegoose': 2.14.6_mongoose@6.5.1
@@ -946,6 +948,13 @@ packages:
       lodash.template: 4.5.0
       picomatch: 2.3.1
       reflect-metadata: 0.1.13
+    dev: false
+
+  /@midwayjs/cross-domain/3.10.15:
+    resolution: {integrity: sha512-itlXkD/t51fwUBMKjpeIPVfTbim6KEGhtEiS0AsCWP1AdD0l2YJU3Uav8YSSKQVsX6qq71xRPXjb/VK9zIX9iA==}
+    engines: {node: '>=12'}
+    dependencies:
+      vary: 1.1.2
     dev: false
 
   /@midwayjs/debugger/1.0.9:

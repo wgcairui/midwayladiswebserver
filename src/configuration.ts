@@ -4,11 +4,12 @@ import * as bodyParser from 'koa-body';
 import { ILifeCycle } from '@midwayjs/core';
 import * as typegoose from '@midwayjs/typegoose';
 import * as cache from '@midwayjs/cache';
+import * as crossDomain from '@midwayjs/cross-domain';
 import { join } from 'path';
 
 @Configuration({
   conflictCheck: true,
-  imports: [typegoose, cache],
+  imports: [typegoose, cache, crossDomain],
   importConfigs: [join(__dirname, './config')],
 })
 export class ContainerLifeCycle implements ILifeCycle {
