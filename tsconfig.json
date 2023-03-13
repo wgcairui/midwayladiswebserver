@@ -15,7 +15,6 @@
     "stripInternal": true,
     "skipLibCheck": false,
     "pretty": true,
-    "declaration": true,
     "typeRoots": [
       "./typings",
       "./node_modules/@types"
