@@ -1,5 +1,5 @@
 import { Init, Provide } from '@midwayjs/decorator';
-import { ReturnModelType, getModelForClass,types } from '@typegoose/typegoose';
+import { ReturnModelType, getModelForClass, types } from '@typegoose/typegoose';
 import { User } from '../entity/user';
 
 /**

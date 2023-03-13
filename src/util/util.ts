@@ -119,12 +119,10 @@ export class Util {
       .then(data => data.data);
   }
 
-
-
   /**
    * 压缩文件
-   * @param input 
-   * @param output 
+   * @param input
+   * @param output
    */
   async do_gzip(input: PathLike, output: PathLike) {
     const gzip = createGzip();

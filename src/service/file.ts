@@ -97,8 +97,7 @@ export class FileDU {
    * @returns
    */
   async rename(oldPath: string, newPath: string) {
-
-    const err = await rename(oldPath, newPath).catch(err => err)
+    const err = await rename(oldPath, newPath).catch(err => err);
     return {
       code: err ? 0 : 200,
       msg: err,

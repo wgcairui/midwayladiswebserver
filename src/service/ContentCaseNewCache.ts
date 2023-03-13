@@ -116,8 +116,9 @@ export class ContentCaseNewCache {
   async GetContentCtx(type: string, link: string) {
     const { en } = this.getarg();
 
-    const collection = `${en ? 'en' : ''}${type.toLocaleLowerCase()}${/s$/.test(type) ? '' : 's'
-      }`;
+    const collection = `${en ? 'en' : ''}${type.toLocaleLowerCase()}${
+      /s$/.test(type) ? '' : 's'
+    }`;
     const model = getModelForClass(Case, { schemaOptions: { collection } });
     const doc = await model.findOne({ link }, { _id: 1 }).lean();
     if (!doc) return null;
@@ -165,8 +166,9 @@ export class ContentCaseNewCache {
     const { en, table, isNews, SiteName, query } = this.getarg();
 
     if (!table) throw new Error('argment table require');
-    const collection = `${en ? 'en' : ''}${table.toLocaleLowerCase()}${/s$/.test(table) ? '' : 's'
-      }`;
+    const collection = `${en ? 'en' : ''}${table.toLocaleLowerCase()}${
+      /s$/.test(table) ? '' : 's'
+    }`;
     // console.log({ collection, en, table, isNews, SiteName, query });
 
     if (table === 'News' || table === 'Case') {

@@ -46,9 +46,15 @@ export class Docments {
   private buyListModel: ReturnModelType<typeof Buy_list, types.BeAnObject>;
   private linkModel: ReturnModelType<typeof LinkFrend, types.BeAnObject>;
   private supportModel: ReturnModelType<typeof Support, types.BeAnObject>;
-  private supportListModel: ReturnModelType<typeof Support_list, types.BeAnObject>;
+  private supportListModel: ReturnModelType<
+    typeof Support_list,
+    types.BeAnObject
+  >;
   private productModel: ReturnModelType<typeof Product, types.BeAnObject>;
-  private productListModel: ReturnModelType<typeof Product_list, types.BeAnObject>;
+  private productListModel: ReturnModelType<
+    typeof Product_list,
+    types.BeAnObject
+  >;
   private routeModel: ReturnModelType<typeof Router, types.BeAnObject>;
   private vrModel: ReturnModelType<typeof VR, types.BeAnObject>;
   private aboutModel: ReturnModelType<typeof About, types.BeAnObject>;

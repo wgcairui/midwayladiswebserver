@@ -40,7 +40,7 @@ export class FileOprate {
       };
     }
     const { dir, ext } = parse(path);
-    const dirs = join(process.cwd(), "static")
+    const dirs = join(process.cwd(), 'static');
 
     const newPath = join(dirs, dir, name + ext);
     const oldPath = join(dirs, path);
@@ -105,9 +105,9 @@ export class FileOprate {
   async file() {
     // if query = xml: '../../../../../../../../../etc/passwd'
     // client can download passwd file of url
-    if(Object.keys(this.ctx.query||{}).length>0){
+    if (Object.keys(this.ctx.query || {}).length > 0) {
       console.log(this.ctx.query);
-      this.ctx.throw('please check url', 404 )
+      this.ctx.throw('please check url', 404);
     }
     if (/^(\/upload|\/docment)/.test(this.ctx.path)) {
       const path = join(process.cwd(), 'static', decodeURI(this.ctx.path));

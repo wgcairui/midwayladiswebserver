@@ -1,5 +1,4 @@
-import { modelOptions, prop } from "@typegoose/typegoose";
-
+import { modelOptions, prop } from '@typegoose/typegoose';
 
 @modelOptions({ schemaOptions: { timestamps: true } })
 export class User {
