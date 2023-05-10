@@ -14,6 +14,7 @@ import { Util } from '../util/util';
 import { Rwxlogin } from '../dto/auth';
 import { WxOpen } from '../service/wxOpen';
 import { Docments } from '../service/docment';
+import { isPhoneNumber } from 'class-validator';
 
 /**
  * 响应用户登录登出等操作
@@ -88,6 +89,7 @@ export class AuthController {
     );
     if (!openUser) throw new Error('login error');
     const user = await this.UserService.getUser(openUser.openid);
+    
     if (user) {
       const token = await this.Util.Secret_JwtSign(user.toJSON());
       return { code: 200, token, user: user };
@@ -97,6 +99,7 @@ export class AuthController {
       return {
         code: 2,
         openUser,
+        agents,
         content: agents.map(el => ({
           name: el.name,
           tels: (el.contactTel || [])
@@ -107,10 +110,7 @@ export class AuthController {
                 return 1 + tel.split('1')[1];
               }
             })
-            .filter(tel =>
-              /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/.test(
-                tel.toString()
-              )
+            .filter(tel => isPhoneNumber(String(tel),'CN')
             ),
         })),
       };
