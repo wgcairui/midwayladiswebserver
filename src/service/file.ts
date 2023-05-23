@@ -65,8 +65,8 @@ export class FileDU {
    * @param path
    * @param name
    */
-  async getFilelist(path: string, filter: string) {
-    const dir = join(__dirname, '../../static', path);
+  async getFilelist(path: string, filter: string, company = '') {
+    const dir = join(__dirname, '../../static', path, company);
     // 转换callback to promise
     const readdir = promisify(fs.readdir);
     // 默认结果
@@ -74,11 +74,11 @@ export class FileDU {
     const result = await readdir(dir)
       .then(files => {
         if (!filter || filter === '') {
-          data.files = files.map(file => `/${path}/${file}`);
+          data.files = files.map(file => '/' + join(path, company, file));
         } else {
           data.files = files
             .filter(file => file.includes(filter))
-            .map(file => `/${path}/${file}`);
+            .map(file => '/' + join(path, company, file));
         }
         data.size = data.files.length;
         return data;
@@ -135,8 +135,8 @@ export class FileDU {
    * @param file
    * @returns
    */
-  async upLoad(file: File) {
-    const uploadDir = join(__dirname, '../../static', 'upload');
+  async upLoad(file: File, company = '') {
+    const uploadDir = join(__dirname, '../../static', 'upload', company);
     // 检查目录是否存在
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });

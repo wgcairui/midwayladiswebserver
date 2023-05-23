@@ -33,18 +33,19 @@ export class FileOprate {
     @Body() path: string,
     @Body() name: string
   ) {
-    if (user.userGroup !== 'admin') {
+    if (user.userGroup === 'admin' || path.includes(user?.company)) {
+      const { dir, ext } = parse(path);
+      const dirs = join(process.cwd(), 'static');
+
+      const newPath = join(dirs, dir, name + ext);
+      const oldPath = join(dirs, path);
+      return await this.FileDU.rename(oldPath, newPath);
+    } else {
       return {
         code: 0,
         msg: 'user error',
       };
     }
-    const { dir, ext } = parse(path);
-    const dirs = join(process.cwd(), 'static');
-
-    const newPath = join(dirs, dir, name + ext);
-    const oldPath = join(dirs, path);
-    return await this.FileDU.rename(oldPath, newPath);
   }
 
   /**
@@ -54,16 +55,16 @@ export class FileOprate {
    */
   @Post('/api/deletefile', { middleware: ['tokenParse'] })
   async deletefile(@Body() user: Uart.UserInfo, @Body() path: string) {
-    if (user.userGroup !== 'admin') {
+    const filepath = join(__dirname, '../../static', path);
+    if (filepath.includes(user?.company) || user.userGroup === 'admin') {
       return {
-        code: 0,
-        msg: 'user error',
+        code: 200,
+        data: await this.FileDU.deleteFile(filepath),
       };
     }
-    const filepath = join(__dirname, '../../static', path);
     return {
-      code: 200,
-      data: await this.FileDU.deleteFile(filepath),
+      code: 0,
+      msg: 'user error',
     };
   }
 
@@ -72,11 +73,11 @@ export class FileOprate {
    * @param name
    * @returns
    */
-  @Post('/api/getUploadFiles')
-  async getUploadFiles(@Body() @Body() name: string) {
+  @Post('/api/getUploadFiles', { middleware: ['tokenParse'] })
+  async getUploadFiles(@Body() user: Uart.UserInfo, @Body() name: string) {
     return {
       code: 200,
-      data: await this.FileDU.getFilelist('upload', name),
+      data: await this.FileDU.getFilelist('upload', name, user?.company),
     };
   }
 
@@ -84,12 +85,12 @@ export class FileOprate {
    * 上传文件
    * @param data
    */
-  @Post('/uploads/files')
-  async uploads() {
+  @Post('/uploads/files', { middleware: ['tokenParse'] })
+  async uploads(@Body() user: Uart.UserInfo) {
     const file = [this.ctx.request.files.file].flat()[0];
     return {
       code: 200,
-      data: await this.FileDU.upLoad(file),
+      data: await this.FileDU.upLoad(file, user?.company),
     };
   }
 
