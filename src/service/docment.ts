@@ -129,6 +129,7 @@ export class Docments {
         time: 1,
         href: 1,
         MainTitle: 1,
+        company: 1,
         _id: 0,
       })
       .lean();
@@ -200,6 +201,7 @@ export class Docments {
         time: 1,
         href: 1,
         MainTitle: 1,
+        company: 1,
         _id: 0,
       })
       .lean();
