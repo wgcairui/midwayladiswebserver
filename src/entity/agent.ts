@@ -77,6 +77,9 @@ export class AgentConfig {
   @Prop({ default: true })
   public showNews: boolean;
 
+  @Prop({ default: true })
+  public showPlatform: boolean;
+
   @Prop({ default: false })
   public showLaungua: boolean;
 }
