@@ -16,7 +16,11 @@ export class siteConfig {
 
   @Get('/agent')
   async agentInfo(@Query() name: string) {
-    return this.Agent.getAgent(name);
+    const agent = await this.Agent.getAgent(name);
+    if (agent) {
+      this.Agent.setAgentLatestActiveTime(agent).catch(() => {});
+    }
+    return agent;
   }
 
   @Get('/linkFrend')

@@ -82,4 +82,8 @@ export class AgentConfig {
 
   @Prop({ default: false })
   public showLaungua: boolean;
+
+  // agent latest active time
+  @Prop()
+  public active: Date;
 }

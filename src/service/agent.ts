@@ -33,6 +33,14 @@ export class Agent {
     return this.configModel.findOne({ name }).lean();
   }
 
+  async setAgentLatestActiveTime(agent: AgentConfig) {
+    agent.active = new Date();
+    return this.configModel.updateOne(
+      { name: agent.name },
+      { $set: { active: new Date() } }
+    );
+  }
+
   /**
    * 获取代理商信息
    * @param filter 刷选条件
