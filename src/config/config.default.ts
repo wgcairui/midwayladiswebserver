@@ -27,3 +27,11 @@ export const cors = {
   // 如果设置了 credentials，则 origin 不能设置为 *
   origin: '*',
 };
+
+// midway-logger 默认 enable file log，但要求 fileLogName；
+// 项目里没声明 midway-logger，所以走默认配置会导致启动失败。
+// 显式 disable file log（输出到 stdout，由 docker logs / deploy.sh logs 收集）。
+// 如需文件日志，设置 fileLogName 即可（参考 @midwayjs/logger 文档）。
+export const midwayLogger = {
+  disableFile: true,
+};

@@ -1,0 +1,44 @@
+# docker compose 部署 midwayladiswebserver
+# 使用：
+#   cp .env.example .env && vi .env
+#   docker compose up -d --build
+#   docker compose logs -f midwayladiswebserver
+#   docker compose restart midwayladiswebserver
+
+services:
+  midwayladiswebserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: midwayladiswebserver:1.1.0
+    container_name: midwayladiswebserver
+    restart: always
+    ports:
+      # 容器内 9007（bootstrap.js 写死），宿主机可改
+      - "${HTTP_PORT:-9007}:9007"
+    environment:
+      # config.default.ts 用 NODE_Docker=docker 来切 Mongo host
+      - NODE_Docker=docker
+      - NODE_ENV=production
+    volumes:
+      # static/ 走宿主机挂载（不污染镜像层）
+      - ./static:/app/static
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9007/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
