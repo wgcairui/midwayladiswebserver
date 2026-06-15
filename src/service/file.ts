@@ -6,7 +6,7 @@ import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { fileDirList } from '../../types/typeing';
 import { File } from 'formidable';
-import * as rmf from 'rimraf';
+import rmf from 'rimraf';
 
 /**
  * 检查文件链接,如果没有此文件,则链接到官网下载
@@ -113,12 +113,10 @@ export class FileDU {
     return new Promise(resolve => {
       const filestat = fs.statSync(filepath);
       if (filestat.isDirectory()) {
-        rmf(filepath, err => {
-          resolve({
-            code: err ? 0 : 200,
-            err,
-          });
-        });
+        // rimraf 4 是 Promise API（不再支持 callback）
+        rmf(filepath)
+          .then(() => resolve({ code: 200, err: null }))
+          .catch(err => resolve({ code: 0, err }));
       } else {
         fs.rm(filepath, err => {
           resolve({
