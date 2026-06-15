@@ -1,8 +1,41 @@
 node_modules
-static
-.dockerignore
+dist
+coverage
+
+# 环境变量文件不要打进镜像
+.env
+.env.*
+!.env.example
+
+.git
 .gitignore
-types
+.github
+.idea
+.vscode
+.DS_Store
+
 Dockerfile
-tsconfig.json
+.dockerignore
+docker-compose.yml
+deploy.sh
+README.md
+CLAUDE.md
+*.md
+
+.eslintrc*
+.eslintcache
+.prettierrc*
+
 logs
+*.log
+
+# static/ 走 volume 挂载（容器外）—— 不打进镜像
+static
+
+# 测试产物
+test
+
+# midway-bin build 需要 tsconfig.json；保留
+!tsconfig.json
+# pnpm-workspace.yaml 决定 onlyBuiltDependencies 行为；保留
+!pnpm-workspace.yaml

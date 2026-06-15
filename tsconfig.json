@@ -13,7 +13,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "stripInternal": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "pretty": true,
     "typeRoots": [
       "./typings",
@@ -32,6 +32,7 @@
   "exclude": [
     "dist",
     "node_modules",
-    "test"
+    "test",
+    "src/key"
   ]
 }

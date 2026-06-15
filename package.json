@@ -13,8 +13,7 @@
     "ci": "npm run cov",
     "build": "midway-bin build -c",
     "check": "luckyeye",
-    "build:docker": "npm run build && sudo docker build -t midwayladiswebserver .",
-    "run:docker": "sudo docker stop midwayladiswebserver && sudo docker rm midwayladiswebserver && sudo docker run -itd --name midwayladiswebserver -p 9007:9007 --volume /home/cc/Web/midwayladiswebserver/static:/app/static midwayladiswebserver"
+    "build:docker": "docker compose build"
   },
   "dependencies": {
     "@cairui/wx-sdk": "^1.0.6",
@@ -24,6 +23,7 @@
     "@midwayjs/core": "^2.13.4",
     "@midwayjs/decorator": "^2.13.2",
     "@midwayjs/koa": "^2.13.4",
+    "@midwayjs/logger": "^2.19.3",
     "@midwayjs/typegoose": "^2.13.5",
     "@typegoose/typegoose": "^11.0.0",
     "axios": "^0.21.1",
@@ -49,7 +49,7 @@
     "@types/jest": "^26.0.10",
     "@types/jsonwebtoken": "^8.5.1",
     "@types/koa": "^2.13.6",
-    "@types/node": "14",
+    "@types/node": "16",
     "@types/node-fetch": "^2.5.10",
     "@types/rimraf": "^3.0.0",
     "cross-env": "^6.0.0",
