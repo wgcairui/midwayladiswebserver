@@ -13,7 +13,8 @@
     "ci": "npm run cov",
     "build": "midway-bin build -c",
     "check": "luckyeye",
-    "build:docker": "docker compose build"
+    "build:docker": "docker compose build",
+    "smoke": "./scripts/smoke.sh"
   },
   "dependencies": {
     "@cairui/wx-sdk": "^1.0.6",
