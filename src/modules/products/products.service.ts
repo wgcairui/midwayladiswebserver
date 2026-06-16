@@ -30,6 +30,13 @@ import {
 } from '@typegoose/typegoose';
 import { Product, Product_list } from '../../entity/docment';
 import { product, productList } from '../../../types/typeing';
+import {
+  FilterClause,
+  FilterOp,
+  SortClause,
+  parseFilter,
+  parseSort,
+} from '../../util/filter';
 
 @Provide()
 export class ProductsService {
@@ -39,6 +46,49 @@ export class ProductsService {
     types.BeAnObject
   >;
 
+  /**
+   * Product entity 字段（DocmentBody + Product 自有 img）：
+   *  DocmentBody: PageTitle/Pagekeywords/Pagedescription/MainUrl/MainTitle/
+   *               MainParent/title/date/table/href/link
+   *  Product:     img
+   */
+  static readonly searchableFields = [
+    'title',
+    'img',
+    'date',
+    'MainTitle',
+    'MainParent',
+    'href',
+    'link',
+    'table',
+    'PageTitle',
+    'Pagekeywords',
+    'Pagedescription',
+    'MainUrl',
+  ] as const;
+
+  static readonly sortableFields = ['title', 'date'] as const;
+
+  static readonly filterOps: Record<string, readonly FilterOp[]> = {
+    title: ['contains', 'eq'],
+    img: ['contains', 'eq'],
+    date: ['eq', 'gte', 'lte'],
+    MainTitle: ['contains', 'eq'],
+    MainParent: ['contains', 'eq'],
+    href: ['contains', 'eq'],
+    link: ['contains', 'eq'],
+    table: ['contains', 'eq'],
+    PageTitle: ['contains', 'eq'],
+    Pagekeywords: ['contains', 'eq'],
+    Pagedescription: ['contains', 'eq'],
+    MainUrl: ['contains', 'eq'],
+  };
+
+  /** 默认排序：title 升序 */
+  private static readonly defaultSort: Record<string, 1 | -1> = {
+    title: 1,
+  };
+
   @Init()
   async init() {
     this.productModel = getModelForClass(Product);
@@ -46,11 +96,30 @@ export class ProductsService {
   }
 
   /**
-   * 获取产品列表
-   * @returns
+   * 获取产品列表 (分页 + filter + sort)
    */
-  getProducts() {
-    return this.productModel.find().lean();
+  async getProducts(
+    skip = 0,
+    limit = 20,
+    filter?: FilterClause[],
+    sort?: SortClause[]
+  ) {
+    const merged = parseFilter(filter, ProductsService.searchableFields);
+
+    const userSort = parseSort(sort, ProductsService.sortableFields);
+    const sortSpec =
+      Object.keys(userSort).length > 0 ? userSort : ProductsService.defaultSort;
+
+    const [items, total] = await Promise.all([
+      this.productModel
+        .find(merged)
+        .sort(sortSpec)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.productModel.countDocuments(merged),
+    ]);
+    return { items, total };
   }
 
   /**

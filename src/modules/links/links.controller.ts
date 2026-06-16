@@ -13,6 +13,7 @@
  *  - setLinks 必须有 tokenParse（中间件挂在路由上）
  */
 import {
+  ALL,
   Body,
   Controller,
   Inject,
@@ -20,8 +21,9 @@ import {
   Provide,
 } from '@midwayjs/decorator';
 import { LinksService } from './links.service';
-import { ok } from '../../util/response';
-import { SetLinksDto } from './links.dto';
+import { normalizePagination, ok, paginated } from '../../util/response';
+import { Wrap } from '../../middleware/response';
+import { GetLinksDto, SetLinksDto } from './links.dto';
 
 @Provide()
 @Controller('/api/links')
@@ -32,10 +34,23 @@ export class LinksController {
   /**
    * 获取友链
    * 老路由：POST /api/getLinks（无入参）
+   * 新增：filter / sort（多维度搜索/排序）
+   *
+   * 公开接口，dto?.filter / dto?.sort 直接读。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getLinks')
-  async getLinks() {
-    return ok(await this.linksService.getLinks());
+  @Wrap()
+  async getLinks(@Body(ALL) dto: GetLinksDto) {
+    const { filter, sort } = dto || {};
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.linksService.getLinks(
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
+    return paginated(items, total, page, pageSize);
   }
 
   /**

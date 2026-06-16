@@ -10,6 +10,13 @@ import { Init, Provide } from '@midwayjs/decorator';
 import { ReturnModelType, getModelForClass, types } from '@typegoose/typegoose';
 import { Support, Support_list } from '../../entity/docment';
 import { support, supportList } from '../../../types/typeing';
+import {
+  FilterClause,
+  FilterOp,
+  SortClause,
+  parseFilter,
+  parseSort,
+} from '../../util/filter';
 
 @Provide()
 export class SupportService {
@@ -18,6 +25,105 @@ export class SupportService {
     typeof Support_list,
     types.BeAnObject
   >;
+
+  /**
+   * Support 实体字段（DocmentBody + Support 自有）：
+   *  DocmentBody: PageTitle/Pagekeywords/Pagedescription/MainUrl/MainTitle/
+   *               MainParent/title/date/table/href/link
+   *  Support:     language/type/platform/size/version/updateReason/down
+   *
+   * Support_list 实体字段（DocmentBody + Support_list 自有）：
+   *  DocmentBody: 同上
+   *  Support_list: movie/html/parentsUntil/parent/data
+   */
+  static readonly softsSearchableFields = [
+    'title',
+    'language',
+    'type',
+    'platform',
+    'size',
+    'version',
+    'updateReason',
+    'down',
+    'date',
+    'MainTitle',
+    'MainParent',
+    'href',
+    'link',
+    'table',
+    'PageTitle',
+    'Pagekeywords',
+    'Pagedescription',
+    'MainUrl',
+  ] as const;
+
+  static readonly softsSortableFields = ['title', 'date'] as const;
+
+  static readonly softsFilterOps: Record<string, readonly FilterOp[]> = {
+    title: ['contains', 'eq'],
+    language: ['contains', 'eq'],
+    type: ['contains', 'eq'],
+    platform: ['contains', 'eq'],
+    size: ['contains', 'eq'],
+    version: ['contains', 'eq'],
+    updateReason: ['contains', 'eq'],
+    down: ['contains', 'eq'],
+    date: ['eq', 'gte', 'lte'],
+    MainTitle: ['contains', 'eq'],
+    MainParent: ['contains', 'eq'],
+    href: ['contains', 'eq'],
+    link: ['contains', 'eq'],
+    table: ['contains', 'eq'],
+    PageTitle: ['contains', 'eq'],
+    Pagekeywords: ['contains', 'eq'],
+    Pagedescription: ['contains', 'eq'],
+    MainUrl: ['contains', 'eq'],
+  };
+
+  static readonly problemsSearchableFields = [
+    'title',
+    'movie',
+    'html',
+    'parentsUntil',
+    'parent',
+    'data',
+    'date',
+    'MainTitle',
+    'MainParent',
+    'href',
+    'link',
+    'table',
+    'PageTitle',
+    'Pagekeywords',
+    'Pagedescription',
+    'MainUrl',
+  ] as const;
+
+  static readonly problemsSortableFields = ['title', 'date'] as const;
+
+  static readonly problemsFilterOps: Record<string, readonly FilterOp[]> = {
+    title: ['contains', 'eq'],
+    movie: ['contains', 'eq'],
+    html: ['contains', 'eq'],
+    parentsUntil: ['contains', 'eq'],
+    parent: ['contains', 'eq'],
+    data: ['contains', 'eq'],
+    date: ['eq', 'gte', 'lte'],
+    MainTitle: ['contains', 'eq'],
+    MainParent: ['contains', 'eq'],
+    href: ['contains', 'eq'],
+    link: ['contains', 'eq'],
+    table: ['contains', 'eq'],
+    PageTitle: ['contains', 'eq'],
+    Pagekeywords: ['contains', 'eq'],
+    Pagedescription: ['contains', 'eq'],
+    MainUrl: ['contains', 'eq'],
+  };
+
+  /** 默认排序：title 升序 */
+  private static readonly defaultSort: Record<string, 1 | -1> = {
+    title: 1,
+  };
 
   @Init()
   async init() {
@@ -28,10 +134,30 @@ export class SupportService {
   // ---- softs (技术支持) ----
 
   /**
-   * 获取所有技术支持资源
+   * 获取所有技术支持资源 (分页 + filter + sort)
    */
-  async getSofts() {
-    return await this.supportModel.find().lean();
+  async getSofts(
+    skip = 0,
+    limit = 20,
+    filter?: FilterClause[],
+    sort?: SortClause[]
+  ) {
+    const merged = parseFilter(filter, SupportService.softsSearchableFields);
+
+    const userSort = parseSort(sort, SupportService.softsSortableFields);
+    const sortSpec =
+      Object.keys(userSort).length > 0 ? userSort : SupportService.defaultSort;
+
+    const [items, total] = await Promise.all([
+      this.supportModel
+        .find(merged)
+        .sort(sortSpec)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.supportModel.countDocuments(merged),
+    ]);
+    return { items, total };
   }
 
   /**
@@ -67,10 +193,33 @@ export class SupportService {
   // ---- problems (常见问题) ----
 
   /**
-   * 获取所有常见问题
+   * 获取所有常见问题 (分页 + filter + sort)
    */
-  async getProblems() {
-    return await this.supportListModel.find().lean();
+  async getProblems(
+    skip = 0,
+    limit = 20,
+    filter?: FilterClause[],
+    sort?: SortClause[]
+  ) {
+    const merged = parseFilter(
+      filter,
+      SupportService.problemsSearchableFields
+    );
+
+    const userSort = parseSort(sort, SupportService.problemsSortableFields);
+    const sortSpec =
+      Object.keys(userSort).length > 0 ? userSort : SupportService.defaultSort;
+
+    const [items, total] = await Promise.all([
+      this.supportListModel
+        .find(merged)
+        .sort(sortSpec)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.supportListModel.countDocuments(merged),
+    ]);
+    return { items, total };
   }
 
   /**

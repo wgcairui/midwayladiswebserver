@@ -6,8 +6,17 @@
  *
  * 注意：koa-body 默认是 application/json + form，老接口里 @Body() / @Body(ALL) 两种
  * 都有；这里统一用 @Body(ALL) + DTO 校验（midway 2 推荐写法）。
+ *
+ * 字段级 filter / sort 校验：
+ *  - field 是否合法 → service 层 parseFilter/parseSort 强校验（白名单）
+ *  - op / dir 字面值 → joi `.valid()` 兜底（防止 typo 提前报错）
+ *  - value 类型 → service 层 parseFilter 强校验（in 要 array / contains 要 string）
+ *
+ * 注意：news/case 的 list 路由挂 tokenParse，不挂 @Validate()（PR #10 教训）。
+ * 所以 DTO 上 @Rule 仅用于 TS 类型契约；运行时过滤靠 service 层兜底。
  */
 import { Rule, RuleType } from '@midwayjs/decorator';
+import { FilterClause, SortClause } from '../../util/filter';
 
 /**
  * GET /api/news/getNewsList
@@ -17,6 +26,49 @@ import { Rule, RuleType } from '@midwayjs/decorator';
 export class GetNewsListDto {
   @Rule(RuleType.string().optional().allow(''))
   site?: string;
+
+  @Rule(RuleType.number().optional().min(1))
+  page?: number;
+
+  @Rule(RuleType.number().optional().min(1).max(100))
+  pageSize?: number;
+
+  /**
+   * 多维度过滤（数组）。
+   * 字段白名单见 NewsService.searchableFields；
+   * 运行时在 service 层 parseFilter 拒绝非法 field / op / value。
+   */
+  @Rule(
+    RuleType.array()
+      .items(
+        RuleType.object({
+          field: RuleType.string().required(),
+          op: RuleType.string()
+            .valid('eq', 'in', 'contains', 'gte', 'lte')
+            .required(),
+          value: RuleType.any(),
+        })
+      )
+      .optional()
+  )
+  filter?: FilterClause[];
+
+  /**
+   * 多维度排序（数组，按顺序应用）。
+   * 字段白名单见 NewsService.sortableFields；
+   * 运行时在 service 层 parseSort 拒绝非法 field / dir。
+   */
+  @Rule(
+    RuleType.array()
+      .items(
+        RuleType.object({
+          field: RuleType.string().required(),
+          dir: RuleType.string().valid('asc', 'desc').required(),
+        })
+      )
+      .optional()
+  )
+  sort?: SortClause[];
 }
 
 /**

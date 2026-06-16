@@ -25,6 +25,13 @@ import {
 } from '@typegoose/typegoose';
 import { Buy_list } from '../../entity/docment';
 import { buyList } from '../../../types/typeing';
+import {
+  FilterClause,
+  FilterOp,
+  SortClause,
+  parseFilter,
+  parseSort,
+} from '../../util/filter';
 
 @Provide()
 export class BuysService {
@@ -33,17 +40,90 @@ export class BuysService {
     types.BeAnObject
   >;
 
+  /**
+   * 经销商列表可搜索字段白名单（与 Buy_list entity 字段对齐 — 继承 DocmentBody）。
+   * DocmentBody 字段：PageTitle / Pagekeywords / Pagedescription / MainUrl /
+   *                  MainTitle / MainParent / title / date / table / href / link
+   * Buy_list 额外：parentsUntil / parent / content
+   */
+  static readonly searchableFields = [
+    'title',
+    'content',
+    'parent',
+    'parentsUntil',
+    'MainTitle',
+    'MainParent',
+    'href',
+    'link',
+    'date',
+    'table',
+    'PageTitle',
+    'Pagekeywords',
+    'Pagedescription',
+    'MainUrl',
+  ] as const;
+
+  /** 经销商列表可排序字段白名单 */
+  static readonly sortableFields = ['title', 'date'] as const;
+
+  /** 每个字段允许的 op 集合（细粒度白名单） */
+  static readonly filterOps: Record<string, readonly FilterOp[]> = {
+    title: ['contains', 'eq'],
+    content: ['contains', 'eq'],
+    parent: ['contains', 'eq'],
+    parentsUntil: ['contains', 'eq'],
+    MainTitle: ['contains', 'eq'],
+    MainParent: ['contains', 'eq'],
+    href: ['contains', 'eq'],
+    link: ['contains', 'eq'],
+    date: ['eq', 'gte', 'lte'],
+    table: ['contains', 'eq'],
+    PageTitle: ['contains', 'eq'],
+    Pagekeywords: ['contains', 'eq'],
+    Pagedescription: ['contains', 'eq'],
+    MainUrl: ['contains', 'eq'],
+  };
+
+  /** 默认排序：title 升序 */
+  private static readonly defaultSort: Record<string, 1 | -1> = {
+    title: 1,
+  };
+
   @Init()
   async init() {
     this.buyListModel = getModelForClass(Buy_list);
   }
 
   /**
-   * 获取经销商列表
-   * @returns
+   * 获取经销商列表 (分页 + filter + sort)
+   *
+   * @param skip   跳过条数
+   * @param limit  返回条数
+   * @param filter 用户 filter 子句
+   * @param sort   用户 sort 子句
    */
-  getBuys() {
-    return this.buyListModel.find().lean();
+  async getBuys(
+    skip = 0,
+    limit = 20,
+    filter?: FilterClause[],
+    sort?: SortClause[]
+  ) {
+    const merged = parseFilter(filter, BuysService.searchableFields);
+
+    const userSort = parseSort(sort, BuysService.sortableFields);
+    const sortSpec =
+      Object.keys(userSort).length > 0 ? userSort : BuysService.defaultSort;
+
+    const [items, total] = await Promise.all([
+      this.buyListModel
+        .find(merged)
+        .sort(sortSpec)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.buyListModel.countDocuments(merged),
+    ]);
+    return { items, total };
   }
 
   /**

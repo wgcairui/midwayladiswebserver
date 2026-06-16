@@ -27,7 +27,8 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { SupportService } from './support.service';
-import { ok } from '../../util/response';
+import { normalizePagination, ok, paginated } from '../../util/response';
+import { Wrap } from '../../middleware/response';
 import {
   GetProblemDto,
   GetProblemsDto,
@@ -47,12 +48,24 @@ export class SupportController {
   // ---- softs (技术支持) ----
 
   /**
-   * 获取所有技术支持资源
+   * 获取所有技术支持资源 (分页 + filter + sort)
+   *
+   * 公开接口，可挂 @Validate()（joi 不会因 user 字段报错）。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getSofts')
   @Validate()
-  async getSofts(@Body(ALL) _dto: GetSoftsDto) {
-    return ok(await this.supportService.getSofts());
+  @Wrap()
+  async getSofts(@Body(ALL) dto: GetSoftsDto) {
+    const { filter, sort } = dto || {};
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.supportService.getSofts(
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
+    return paginated(items, total, page, pageSize);
   }
 
   /**
@@ -85,12 +98,24 @@ export class SupportController {
   // ---- problems (常见问题) ----
 
   /**
-   * 获取所有常见问题
+   * 获取所有常见问题 (分页 + filter + sort)
+   *
+   * 公开接口，可挂 @Validate()。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getProblems')
   @Validate()
-  async getProblems(@Body(ALL) _dto: GetProblemsDto) {
-    return ok(await this.supportService.getProblems());
+  @Wrap()
+  async getProblems(@Body(ALL) dto: GetProblemsDto) {
+    const { filter, sort } = dto || {};
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.supportService.getProblems(
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
+    return paginated(items, total, page, pageSize);
   }
 
   /**

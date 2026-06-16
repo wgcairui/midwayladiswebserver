@@ -23,7 +23,8 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { NewsService } from './news.service';
-import { fail, ok } from '../../util/response';
+import { fail, normalizePagination, ok, paginated } from '../../util/response';
+import { Wrap } from '../../middleware/response';
 import {
   DelNewsDto,
   GetNewsDto,
@@ -44,17 +45,38 @@ export class NewsController {
   /**
    * 获取新闻列表
    * 老入参：@Body() user, @Body() site? —— site 优先 + fallback
+   * 新增：filter / sort（多维度搜索/排序）
+   *
+   * 注意：不挂 @Validate()（与 PR #10 教训一致 — tokenParse 注入 user，
+   * joi 会因 unknown user 字段报 "user is not allowed"）。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getNewsList', { middleware: ['tokenParse'] })
+  @Wrap()
   async getNewsList(@Body(ALL) dto: GetNewsListDto) {
     // tokenParse 中间件会把 user 注入到 ctx.request.body.user
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const site = dto?.site;
+    const { filter, sort } = dto || {};
+    const { skip, page, pageSize } = normalizePagination(dto);
     if (site) {
-      const list = await this.newsService.getNewsList(site);
-      return ok(list.length > 0 ? list : await this.newsService.getNewsList());
+      const { items, total } = await this.newsService.getNewsList(
+        site,
+        skip,
+        pageSize,
+        filter,
+        sort
+      );
+      if (items.length > 0) return paginated(items, total, page, pageSize);
     }
-    return ok(await this.newsService.getNewsList(user?.company));
+    const { items, total } = await this.newsService.getNewsList(
+      user?.company,
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
+    return paginated(items, total, page, pageSize);
   }
 
   /**
