@@ -60,6 +60,9 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "patchedDependencies": {
+    "@midwayjs/mock@2.3.0": "patches/@midwayjs__mock@2.3.0.patch"
+  },
   "midway-bin-clean": [
     ".vscode/.tsbuildinfo",
     "dist"
