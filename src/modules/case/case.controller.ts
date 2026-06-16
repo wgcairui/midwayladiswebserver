@@ -16,7 +16,7 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { CaseService } from './case.service';
-import { fail, ok } from '../../util/response';
+import { fail, normalizePagination, ok, paginated } from '../../util/response';
 import {
   DelCaseDto,
   GetCaseDto,
@@ -42,11 +42,13 @@ export class CaseController {
   async getCaseList(@Body(ALL) dto: GetCaseListDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const site = dto?.site;
+    const { skip, page, pageSize } = normalizePagination(dto);
     if (site) {
-      const list = await this.caseService.getCaseList(site);
-      return ok(list.length > 0 ? list : await this.caseService.getCaseList());
+      const { items, total } = await this.caseService.getCaseList(site, skip, pageSize);
+      if (items.length > 0) return paginated(items, total, page, pageSize);
     }
-    return ok(await this.caseService.getCaseList(user?.company));
+    const { items, total } = await this.caseService.getCaseList(user?.company, skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**

@@ -22,7 +22,7 @@ import {
   Validate,
 } from '@midwayjs/decorator';
 import { BuysService } from './buys.service';
-import { ok } from '../../util/response';
+import { normalizePagination, ok, paginated } from '../../util/response';
 import { DelBuyDto, GetBuyDto, GetBuysDto, SetBuyDto } from './buys.dto';
 
 @Provide()
@@ -37,8 +37,10 @@ export class BuysController {
    */
   @Post('/getBuys')
   @Validate()
-  async getBuys(@Body(ALL) _dto: GetBuysDto) {
-    return ok(await this.buysService.getBuys());
+  async getBuys(@Body(ALL) dto: GetBuysDto) {
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.buysService.getBuys(skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**

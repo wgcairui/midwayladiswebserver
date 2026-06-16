@@ -17,6 +17,12 @@ import { Rule, RuleType } from '@midwayjs/decorator';
 export class GetNewsListDto {
   @Rule(RuleType.string().optional().allow(''))
   site?: string;
+
+  @Rule(RuleType.number().optional().min(1))
+  page?: number;
+
+  @Rule(RuleType.number().optional().min(1).max(100))
+  pageSize?: number;
 }
 
 /**

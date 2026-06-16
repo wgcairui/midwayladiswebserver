@@ -19,7 +19,11 @@ import { Rule, RuleType } from '@midwayjs/decorator';
  * 新 DTO 兼容：空类（用 @Body(ALL) 时 koa-body 给空对象也能命中）
  */
 export class GetBuysDto {
-  // 空 — 老接口无入参
+  @Rule(RuleType.number().optional().min(1))
+  page?: number;
+
+  @Rule(RuleType.number().optional().min(1).max(100))
+  pageSize?: number;
 }
 
 /**

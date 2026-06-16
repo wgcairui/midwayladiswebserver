@@ -30,22 +30,32 @@ export class NewsService {
   }
 
   /**
-   * 获取新闻列表
+   * 获取新闻列表 (分页)
    * @param company 组织
+   * @param skip 跳过条数 (= (page-1) * pageSize)
+   * @param limit 返回条数
+   * @returns { items, total } — items 是当页数据, total 是符合条件总数
    */
-  async getNewsList(company?: string) {
-    return await this.newsModel
-      .find(company ? { company } : {}, {
-        img: 1,
-        text: 1,
-        name: 1,
-        time: 1,
-        href: 1,
-        MainTitle: 1,
-        company: 1,
-        _id: 0,
-      })
-      .lean();
+  async getNewsList(company?: string, skip = 0, limit = 20) {
+    const filter = company ? { company } : {};
+    const [items, total] = await Promise.all([
+      this.newsModel
+        .find(filter, {
+          img: 1,
+          text: 1,
+          name: 1,
+          time: 1,
+          href: 1,
+          MainTitle: 1,
+          company: 1,
+          _id: 0,
+        })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.newsModel.countDocuments(filter),
+    ]);
+    return { items, total };
   }
 
   /**

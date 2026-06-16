@@ -27,7 +27,7 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { ProductsService } from './products.service';
-import { ok } from '../../util/response';
+import { normalizePagination, ok, paginated } from '../../util/response';
 import {
   DelProductDto,
   GetProductDto,
@@ -45,13 +45,15 @@ export class ProductsController {
   productsService: ProductsService;
 
   /**
-   * 获取产品列表
+   * 获取产品列表 (分页)
    * 老入参：无
    */
   @Post('/getProducts')
   @Validate()
-  async getProducts(@Body(ALL) _dto: GetProductsDto) {
-    return ok(await this.productsService.getProducts());
+  async getProducts(@Body(ALL) dto: GetProductsDto) {
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.productsService.getProducts(skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**

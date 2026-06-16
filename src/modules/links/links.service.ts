@@ -18,10 +18,14 @@ export class LinksService {
   }
 
   /**
-   * 获取友链
+   * 获取友链 (分页)
    */
-  async getLinks() {
-    return await this.linkModel.find().lean();
+  async getLinks(skip = 0, limit = 20) {
+    const [items, total] = await Promise.all([
+      this.linkModel.find().skip(skip).limit(limit).lean(),
+      this.linkModel.countDocuments(),
+    ]);
+    return { items, total };
   }
 
   /**

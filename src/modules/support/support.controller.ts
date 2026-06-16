@@ -27,7 +27,7 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { SupportService } from './support.service';
-import { ok } from '../../util/response';
+import { normalizePagination, ok, paginated } from '../../util/response';
 import {
   GetProblemDto,
   GetProblemsDto,
@@ -47,12 +47,14 @@ export class SupportController {
   // ---- softs (技术支持) ----
 
   /**
-   * 获取所有技术支持资源
+   * 获取所有技术支持资源 (分页)
    */
   @Post('/getSofts')
   @Validate()
-  async getSofts(@Body(ALL) _dto: GetSoftsDto) {
-    return ok(await this.supportService.getSofts());
+  async getSofts(@Body(ALL) dto: GetSoftsDto) {
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.supportService.getSofts(skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**
@@ -85,12 +87,14 @@ export class SupportController {
   // ---- problems (常见问题) ----
 
   /**
-   * 获取所有常见问题
+   * 获取所有常见问题 (分页)
    */
   @Post('/getProblems')
   @Validate()
-  async getProblems(@Body(ALL) _dto: GetProblemsDto) {
-    return ok(await this.supportService.getProblems());
+  async getProblems(@Body(ALL) dto: GetProblemsDto) {
+    const { skip, page, pageSize } = normalizePagination(dto);
+    const { items, total } = await this.supportService.getProblems(skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**

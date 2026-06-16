@@ -39,11 +39,16 @@ export class BuysService {
   }
 
   /**
-   * 获取经销商列表
-   * @returns
+   * 获取经销商列表 (分页)
+   * @param skip 跳过条数
+   * @param limit 返回条数
    */
-  getBuys() {
-    return this.buyListModel.find().lean();
+  async getBuys(skip = 0, limit = 20) {
+    const [items, total] = await Promise.all([
+      this.buyListModel.find().skip(skip).limit(limit).lean(),
+      this.buyListModel.countDocuments(),
+    ]);
+    return { items, total };
   }
 
   /**

@@ -12,8 +12,11 @@ import { Rule, RuleType } from '@midwayjs/decorator';
  * 新 DTO 兼容：保留空 dto 以便后续扩展
  */
 export class GetSoftsDto {
-  @Rule(RuleType.string().optional().allow(''))
-  _?: string;
+  @Rule(RuleType.number().optional().min(1))
+  page?: number;
+
+  @Rule(RuleType.number().optional().min(1).max(100))
+  pageSize?: number;
 }
 
 /**
@@ -48,8 +51,11 @@ export class DelSoftDto {
  * 老入参：无 body
  */
 export class GetProblemsDto {
-  @Rule(RuleType.string().optional().allow(''))
-  _?: string;
+  @Rule(RuleType.number().optional().min(1))
+  page?: number;
+
+  @Rule(RuleType.number().optional().min(1).max(100))
+  pageSize?: number;
 }
 
 /**

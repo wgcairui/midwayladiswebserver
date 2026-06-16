@@ -46,11 +46,14 @@ export class ProductsService {
   }
 
   /**
-   * 获取产品列表
-   * @returns
+   * 获取产品列表 (分页)
    */
-  getProducts() {
-    return this.productModel.find().lean();
+  async getProducts(skip = 0, limit = 20) {
+    const [items, total] = await Promise.all([
+      this.productModel.find().skip(skip).limit(limit).lean(),
+      this.productModel.countDocuments(),
+    ]);
+    return { items, total };
   }
 
   /**

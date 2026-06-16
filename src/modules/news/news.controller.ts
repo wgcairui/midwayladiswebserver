@@ -23,7 +23,7 @@ import {
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { NewsService } from './news.service';
-import { fail, ok } from '../../util/response';
+import { fail, normalizePagination, ok, paginated } from '../../util/response';
 import {
   DelNewsDto,
   GetNewsDto,
@@ -50,11 +50,13 @@ export class NewsController {
     // tokenParse 中间件会把 user 注入到 ctx.request.body.user
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const site = dto?.site;
+    const { skip, page, pageSize } = normalizePagination(dto);
     if (site) {
-      const list = await this.newsService.getNewsList(site);
-      return ok(list.length > 0 ? list : await this.newsService.getNewsList());
+      const { items, total } = await this.newsService.getNewsList(site, skip, pageSize);
+      if (items.length > 0) return paginated(items, total, page, pageSize);
     }
-    return ok(await this.newsService.getNewsList(user?.company));
+    const { items, total } = await this.newsService.getNewsList(user?.company, skip, pageSize);
+    return paginated(items, total, page, pageSize);
   }
 
   /**

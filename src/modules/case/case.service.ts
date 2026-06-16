@@ -23,19 +23,26 @@ export class CaseService {
    * 获取案例列表
    * @param company 组织
    */
-  async getCaseList(company?: string) {
-    return await this.caseModel
-      .find(company ? { company } : {}, {
-        img: 1,
-        text: 1,
-        name: 1,
-        time: 1,
-        href: 1,
-        MainTitle: 1,
-        company: 1,
-        _id: 0,
-      })
-      .lean();
+  async getCaseList(company?: string, skip = 0, limit = 20) {
+    const filter = company ? { company } : {};
+    const [items, total] = await Promise.all([
+      this.caseModel
+        .find(filter, {
+          img: 1,
+          text: 1,
+          name: 1,
+          time: 1,
+          href: 1,
+          MainTitle: 1,
+          company: 1,
+          _id: 0,
+        })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.caseModel.countDocuments(filter),
+    ]);
+    return { items, total };
   }
 
   /**

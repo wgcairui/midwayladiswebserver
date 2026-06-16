@@ -28,10 +28,14 @@ export class SupportService {
   // ---- softs (技术支持) ----
 
   /**
-   * 获取所有技术支持资源
+   * 获取所有技术支持资源 (分页)
    */
-  async getSofts() {
-    return await this.supportModel.find().lean();
+  async getSofts(skip = 0, limit = 20) {
+    const [items, total] = await Promise.all([
+      this.supportModel.find().skip(skip).limit(limit).lean(),
+      this.supportModel.countDocuments(),
+    ]);
+    return { items, total };
   }
 
   /**
@@ -67,10 +71,14 @@ export class SupportService {
   // ---- problems (常见问题) ----
 
   /**
-   * 获取所有常见问题
+   * 获取所有常见问题 (分页)
    */
-  async getProblems() {
-    return await this.supportListModel.find().lean();
+  async getProblems(skip = 0, limit = 20) {
+    const [items, total] = await Promise.all([
+      this.supportListModel.find().skip(skip).limit(limit).lean(),
+      this.supportListModel.countDocuments(),
+    ]);
+    return { items, total };
   }
 
   /**
