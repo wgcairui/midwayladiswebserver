@@ -1,0 +1,56 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+deleted file mode 100644
+index 7947421eb322831548348b3e249b62baea9ebe05..0000000000000000000000000000000000000000
+diff --git a/dist/index.js b/dist/index.js
+index bc2f6cc34643a23d06a1b8e6723b6062e1c63900..0f1e52039183c778f39c167b5a3e74b9dd700415 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -21,4 +21,48 @@ Object.defineProperty(exports, "createHttpRequest", { enumerable: true, get: fun
+ __exportStar(require("egg-mock"), exports);
+ __exportStar(require("./interface"), exports);
+ __exportStar(require("./mock"), exports);
++// --- createBootstrap bridge (patched for cli-plugin-dev@1.3.21) ---
++// cli-plugin-dev@1.3.21 src/child.ts:53 destructures `createBootstrap`
++// from `@midwayjs/mock`, but mock@2.3.x does not export it (that API was
++// introduced in Midway 3). This bridge loads the user's entry file (which
++// is expected to call `Bootstrap.load(...).run()`) and returns a starter
++// object exposing the `close()` method that cli-plugin-dev invokes on
++// shutdown. See patches/@midwayjs+mock@2.3.0.patch for context.
++(function () {
++    var bootstrapModule = require('@midwayjs/bootstrap');
++    var Bootstrap = bootstrapModule.Bootstrap;
++    var isTypeScriptEnvironment = bootstrapModule.isTypeScriptEnvironment;
++    var capturedRunPromise = null;
++    var originalRun = Bootstrap.run;
++    Bootstrap.run = function patchedRun() {
++        if (capturedRunPromise === null) {
++            capturedRunPromise = originalRun.apply(this, arguments);
++        }
++        return capturedRunPromise;
++    };
++    exports.createBootstrap = async function createBootstrap(entryFile) {
++        capturedRunPromise = null;
++        if (isTypeScriptEnvironment()) {
++            require('ts-node/register');
++        }
++        var path = require('path');
++        var resolvedEntry;
++        if (path.isAbsolute(entryFile)) {
++            resolvedEntry = entryFile;
++        }
++        else {
++            resolvedEntry = path.resolve(process.cwd(), entryFile);
++        }
++        require(resolvedEntry);
++        if (capturedRunPromise) {
++            await capturedRunPromise;
++        }
++        var starter = Bootstrap.getStarter();
++        return {
++            close: async function close() { return Bootstrap.stop(); },
++            stop: async function stop() { return Bootstrap.stop(); },
++            getStarter: function getStarter() { return starter; },
++        };
++    };
++})();
+ //# sourceMappingURL=index.js.map
