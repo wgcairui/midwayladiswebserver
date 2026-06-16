@@ -390,6 +390,8 @@ export class Docments {
   /**
    * 获取产品列表
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/products/products.service.ts（ProductsService.getProducts）
+   *             —— 新路由 POST /api/products/getProducts。老路由 /api/getProducts 暂保留。
    */
   getProducts() {
     return this.productModel.find().lean();
@@ -399,6 +401,8 @@ export class Docments {
    * 获取产品详情
    * @param title
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/products/products.service.ts（ProductsService.getProduct）
+   *             —— 新路由 POST /api/products/getProduct。老路由 /api/getProduct 暂保留。
    */
   getProduct(title: string) {
     return this.productListModel.findOne({ title }).lean();
@@ -408,6 +412,8 @@ export class Docments {
    * set产品详情
    * @param title
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/products/products.service.ts（ProductsService.setProduct）
+   *             —— 新路由 POST /api/products/setProduct（带 tokenParse）。老路由 /api/setProduct 暂保留。
    */
   async setProduct(product: product, list: productList) {
     await this.productModel.updateOne(
@@ -426,6 +432,8 @@ export class Docments {
    * del产品详情
    * @param title
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/products/products.service.ts（ProductsService.delProduct）
+   *             —— 新路由 POST /api/products/delProduct（带 tokenParse）。老路由 /api/delProduct 暂保留。
    */
   delProduct(title: string) {
     return this.productListModel.deleteOne({ title });
