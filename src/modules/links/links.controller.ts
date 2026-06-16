@@ -18,7 +18,6 @@ import {
   Inject,
   Post,
   Provide,
-  Validate,
 } from '@midwayjs/decorator';
 import { LinksService } from './links.service';
 import { ok } from '../../util/response';
@@ -44,8 +43,7 @@ export class LinksController {
    * 老路由：POST /api/setLinks（name, link）
    */
   @Post('/setLinks', { middleware: ['tokenParse'] })
-  @Validate()
   async setLinks(@Body() dto: SetLinksDto) {
-    return ok(await this.linksService.setLinks(dto.name, dto.link));
+    return ok(await this.linksService.setLinks(dto?.name, dto?.link));
   }
 }

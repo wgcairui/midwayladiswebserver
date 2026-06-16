@@ -20,7 +20,6 @@ import {
   Inject,
   Post,
   Provide,
-  Validate,
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { NewsService } from './news.service';
@@ -47,7 +46,6 @@ export class NewsController {
    * 老入参：@Body() user, @Body() site? —— site 优先 + fallback
    */
   @Post('/getNewsList', { middleware: ['tokenParse'] })
-  @Validate()
   async getNewsList(@Body(ALL) dto: GetNewsListDto) {
     // tokenParse 中间件会把 user 注入到 ctx.request.body.user
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
@@ -63,18 +61,16 @@ export class NewsController {
    * 获取新闻详情
    */
   @Post('/getNews')
-  @Validate()
   async getNews(@Body(ALL) dto: GetNewsDto) {
-    return ok(await this.newsService.getNews(dto.title));
+    return ok(await this.newsService.getNews(dto?.title));
   }
 
   /**
    * 获取新闻列表单例
    */
   @Post('/getNewsListOne')
-  @Validate()
   async getNewsListOne(@Body(ALL) dto: GetNewsListOneDto) {
-    return ok(await this.newsService.getNewsListOne(dto.title));
+    return ok(await this.newsService.getNewsListOne(dto?.title));
   }
 
   /**
@@ -84,7 +80,6 @@ export class NewsController {
    *   2. 若已存在且 company 不匹配 + 非 admin → 拒绝
    */
   @Post('/setNews', { middleware: ['tokenParse'] })
-  @Validate()
   async setNews(@Body(ALL) dto: SetNewsDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const { news, list } = dto;
@@ -105,13 +100,12 @@ export class NewsController {
    * 业务规则：若已存在且 company 不匹配 + 非 admin → 拒绝
    */
   @Post('/delNews', { middleware: ['tokenParse'] })
-  @Validate()
   async delNews(@Body(ALL) dto: DelNewsDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
-    const n = await this.newsService.getNews(dto.title);
+    const n = await this.newsService.getNews(dto?.title);
     if (n && n.company !== user?.company) {
       return fail('非法修改');
     }
-    return ok(await this.newsService.delNews(dto.title));
+    return ok(await this.newsService.delNews(dto?.title));
   }
 }

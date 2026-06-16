@@ -13,7 +13,6 @@ import {
   Inject,
   Post,
   Provide,
-  Validate,
 } from '@midwayjs/decorator';
 import { Context } from '@midwayjs/koa';
 import { CaseService } from './case.service';
@@ -40,7 +39,6 @@ export class CaseController {
    * 老入参：@Body() user, @Body() site? —— site 优先 + fallback
    */
   @Post('/getCaseList', { middleware: ['tokenParse'] })
-  @Validate()
   async getCaseList(@Body(ALL) dto: GetCaseListDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const site = dto?.site;
@@ -55,18 +53,16 @@ export class CaseController {
    * 获取案例详情
    */
   @Post('/getCase')
-  @Validate()
   async getCase(@Body(ALL) dto: GetCaseDto) {
-    return ok(await this.caseService.getCase(dto.title));
+    return ok(await this.caseService.getCase(dto?.title));
   }
 
   /**
    * 获取案例列表单例
    */
   @Post('/getCaseListOne')
-  @Validate()
   async getCaseListOne(@Body(ALL) dto: GetCaseListOneDto) {
-    return ok(await this.caseService.getCaseListOne(dto.title));
+    return ok(await this.caseService.getCaseListOne(dto?.title));
   }
 
   /**
@@ -76,7 +72,6 @@ export class CaseController {
    *   2. 若已存在且 company 不匹配 + 非 admin → 拒绝
    */
   @Post('/setCase', { middleware: ['tokenParse'] })
-  @Validate()
   async setCase(@Body(ALL) dto: SetCaseDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
     const { cases, list } = dto;
@@ -96,13 +91,12 @@ export class CaseController {
    * 业务规则：若已存在且 company 不匹配 + 非 admin → 拒绝
    */
   @Post('/delCase', { middleware: ['tokenParse'] })
-  @Validate()
   async delCase(@Body(ALL) dto: DelCaseDto) {
     const user = (this.ctx.request.body as any).user as Uart.UserInfo;
-    const n = await this.caseService.getCase(dto.title);
+    const n = await this.caseService.getCase(dto?.title);
     if (n && n.company !== user?.company) {
       return fail('非法修改');
     }
-    return ok(await this.caseService.delCase(dto.title));
+    return ok(await this.caseService.delCase(dto?.title));
   }
 }
