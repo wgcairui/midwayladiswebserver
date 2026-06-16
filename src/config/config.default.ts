@@ -6,8 +6,6 @@ export const mongoose = {
   }:27017/ladis`,
   options: {
     dbName: 'ladis',
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     /* useCreateIndex: true, */
   } as ConnectOptions,
 };
