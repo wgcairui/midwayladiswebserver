@@ -253,6 +253,8 @@ export class Docments {
   /**
    * 获取经销商列表
    * @returns
+   * @deprecated 阶段 1.3 起，新路由请走 `BuysService` + `/api/buys/getBuys`（见 src/modules/buys/）。
+   *             老路由 `/api/getBuys` 仍可用，等价迁移完成（M2）后再删除。
    */
   getBuys() {
     return this.buyListModel.find().lean();
@@ -260,6 +262,7 @@ export class Docments {
 
   /**
    * 获取指定经销商信息
+   * @deprecated 阶段 1.3 起，新路由请走 `BuysService` + `/api/buys/getBuy`。
    */
   getBuy(title: string) {
     return this.buyListModel.findOne({ title }).lean();
@@ -268,6 +271,7 @@ export class Docments {
   /**
    * 删除指定经销商
    * @param title
+   * @deprecated 阶段 1.3 起，新路由请走 `BuysService` + `/api/buys/delBuy`。
    */
   async delBuy(title: string) {
     return await this.buyListModel.deleteOne({ title });
@@ -277,6 +281,7 @@ export class Docments {
    * 设置经销商
    * @param buy
    * @returns
+   * @deprecated 阶段 1.3 起，新路由请走 `BuysService` + `/api/buys/setBuy`。
    */
   setBuy(buy: buyList) {
     return this.buyListModel.updateOne(
@@ -289,6 +294,8 @@ export class Docments {
   /**
    * 获取友链
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/links/links.service.ts（LinksService.getLinks）
+   *             —— 新路由 POST /api/links/getLinks。老路由 /api/getLinks 暂保留。
    */
   getLinks() {
     return this.linkModel.find().lean();
@@ -297,6 +304,8 @@ export class Docments {
   /**
    * 设置友链
    * @returns
+   * @deprecated 阶段 1.3 抽出至 src/modules/links/links.service.ts（LinksService.setLinks）
+   *             —— 新路由 POST /api/links/setLinks。老路由 /api/setLinks 暂保留。
    */
   setLinks(name: string, link: string) {
     return this.linkModel.updateOne(
