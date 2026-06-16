@@ -28,6 +28,7 @@ import {
 import { Context } from '@midwayjs/koa';
 import { ProductsService } from './products.service';
 import { normalizePagination, ok, paginated } from '../../util/response';
+import { Wrap } from '../../middleware/response';
 import {
   DelProductDto,
   GetProductDto,
@@ -45,14 +46,24 @@ export class ProductsController {
   productsService: ProductsService;
 
   /**
-   * 获取产品列表 (分页)
+   * 获取产品列表 (分页 + filter + sort)
    * 老入参：无
+   *
+   * 公开接口，可挂 @Validate()（joi 不会因 user 字段报错）。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getProducts')
   @Validate()
+  @Wrap()
   async getProducts(@Body(ALL) dto: GetProductsDto) {
+    const { filter, sort } = dto || {};
     const { skip, page, pageSize } = normalizePagination(dto);
-    const { items, total } = await this.productsService.getProducts(skip, pageSize);
+    const { items, total } = await this.productsService.getProducts(
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
     return paginated(items, total, page, pageSize);
   }
 
