@@ -23,6 +23,7 @@ import {
 } from '@midwayjs/decorator';
 import { BuysService } from './buys.service';
 import { normalizePagination, ok, paginated } from '../../util/response';
+import { Wrap } from '../../middleware/response';
 import { DelBuyDto, GetBuyDto, GetBuysDto, SetBuyDto } from './buys.dto';
 
 @Provide()
@@ -34,12 +35,23 @@ export class BuysController {
   /**
    * 获取经销商列表
    * 老入参：无
+   * 新增：filter / sort（多维度搜索/排序）
+   *
+   * 公开接口，可挂 @Validate()（joi 不会因 user 字段报错）。
+   * filter/sort 字段合法性在 service 层 parseFilter/parseSort 兜底。
    */
   @Post('/getBuys')
   @Validate()
+  @Wrap()
   async getBuys(@Body(ALL) dto: GetBuysDto) {
+    const { filter, sort } = dto || {};
     const { skip, page, pageSize } = normalizePagination(dto);
-    const { items, total } = await this.buysService.getBuys(skip, pageSize);
+    const { items, total } = await this.buysService.getBuys(
+      skip,
+      pageSize,
+      filter,
+      sort
+    );
     return paginated(items, total, page, pageSize);
   }
 

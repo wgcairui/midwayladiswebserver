@@ -17,11 +17,70 @@ import { Init, Provide } from '@midwayjs/decorator';
 import { ReturnModelType, getModelForClass, types } from '@typegoose/typegoose';
 import { New, News_list } from '../../entity/docment';
 import { caseList, cases } from '../../../types/typeing';
+import {
+  FilterClause,
+  FilterOp,
+  SortClause,
+  parseFilter,
+  parseSort,
+} from '../../util/filter';
 
 @Provide()
 export class NewsService {
   private newsModel: ReturnModelType<typeof New, types.BeAnObject>;
   private newListModel: ReturnModelType<typeof News_list, types.BeAnObject>;
+
+  /**
+   * 列表可搜索字段白名单（与 entity 字段对齐：Links + company）。
+   * 任何不在这里的 field 都会被 parseFilter 拒绝（防 NoSQL 注入）。
+   */
+  static readonly searchableFields = [
+    'img',
+    'text',
+    'name',
+    'time',
+    'href',
+    'link',
+    'linkText',
+    'MainTitle',
+    'company',
+  ] as const;
+
+  /** 列表可排序字段白名单 */
+  static readonly sortableFields = ['time', 'company'] as const;
+
+  /**
+   * 每个字段允许的 op 集合（细粒度白名单 — 防止 contains 用于非字符串字段等）。
+   * 与 search/sort 白名单取交集才是真正可用的子集。
+   */
+  static readonly filterOps: Record<string, readonly FilterOp[]> = {
+    text: ['contains', 'eq'],
+    name: ['contains', 'eq'],
+    href: ['contains', 'eq'],
+    link: ['contains', 'eq'],
+    linkText: ['contains', 'eq'],
+    MainTitle: ['contains', 'eq'],
+    img: ['contains', 'eq'],
+    time: ['eq', 'gte', 'lte'],
+    company: ['eq', 'in'],
+  };
+
+  /** 列表投影字段（与老实现保持一致） */
+  private static readonly projection = {
+    img: 1,
+    text: 1,
+    name: 1,
+    time: 1,
+    href: 1,
+    MainTitle: 1,
+    company: 1,
+    _id: 0,
+  } as const;
+
+  /** 默认排序：时间倒序（与老 Docments.getNewsList 行为一致） */
+  private static readonly defaultSort: Record<string, 1 | -1> = {
+    time: -1,
+  };
 
   @Init()
   async init() {
@@ -30,30 +89,42 @@ export class NewsService {
   }
 
   /**
-   * 获取新闻列表 (分页)
-   * @param company 组织
-   * @param skip 跳过条数 (= (page-1) * pageSize)
-   * @param limit 返回条数
-   * @returns { items, total } — items 是当页数据, total 是符合条件总数
+   * 获取新闻列表 (分页 + filter + sort)
+   *
+   * 调用方（controller）按业务优先级合并 filter：
+   *   - site / user.company 是强约束（越权防护），优先级最高
+   *   - dto.filter 是用户搜索条件，会与公司约束 AND 合并
+   *
+   * @param company  公司（来自 site 或 user.company；强制约束）
+   * @param skip     跳过条数 (= (page-1) * pageSize)
+   * @param limit    返回条数
+   * @param filter   用户 filter 子句（走白名单 + parseFilter 防注入）
+   * @param sort     用户 sort 子句（走白名单 + parseSort 防注入）
+   * @returns { items, total }
    */
-  async getNewsList(company?: string, skip = 0, limit = 20) {
-    const filter = company ? { company } : {};
+  async getNewsList(
+    company?: string,
+    skip = 0,
+    limit = 20,
+    filter?: FilterClause[],
+    sort?: SortClause[]
+  ) {
+    const companyFilter = company ? { company } : {};
+    const userFilter = parseFilter(filter, NewsService.searchableFields);
+    const merged = { ...companyFilter, ...userFilter };
+
+    const userSort = parseSort(sort, NewsService.sortableFields);
+    const sortSpec =
+      Object.keys(userSort).length > 0 ? userSort : NewsService.defaultSort;
+
     const [items, total] = await Promise.all([
       this.newsModel
-        .find(filter, {
-          img: 1,
-          text: 1,
-          name: 1,
-          time: 1,
-          href: 1,
-          MainTitle: 1,
-          company: 1,
-          _id: 0,
-        })
+        .find(merged, NewsService.projection)
+        .sort(sortSpec)
         .skip(skip)
         .limit(limit)
         .lean(),
-      this.newsModel.countDocuments(filter),
+      this.newsModel.countDocuments(merged),
     ]);
     return { items, total };
   }
