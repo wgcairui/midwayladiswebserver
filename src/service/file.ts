@@ -6,7 +6,6 @@ import fetch from 'node-fetch';
 import { promisify } from 'util';
 import { fileDirList } from '../../types/typeing';
 import { File } from 'formidable';
-import rmf from 'rimraf';
 
 /**
  * 检查文件链接,如果没有此文件,则链接到官网下载
@@ -110,21 +109,16 @@ export class FileDU {
    * @returns
    */
   async deleteFile(filepath: string) {
+    // fs.rm with { recursive: true, force: true } handles files, empty dirs,
+    // and non-empty dirs in one call — replaces the old rimraf dependency.
+    // force: true ignores ENOENT so missing targets resolve cleanly.
     return new Promise(resolve => {
-      const filestat = fs.statSync(filepath);
-      if (filestat.isDirectory()) {
-        // rimraf 4 是 Promise API（不再支持 callback）
-        rmf(filepath)
-          .then(() => resolve({ code: 200, err: null }))
-          .catch(err => resolve({ code: 0, err }));
-      } else {
-        fs.rm(filepath, err => {
-          resolve({
-            code: err ? 0 : 200,
-            err,
-          });
+      fs.rm(filepath, { recursive: true, force: true }, err => {
+        resolve({
+          code: err ? 0 : 200,
+          err,
         });
-      }
+      });
     });
   }
 
