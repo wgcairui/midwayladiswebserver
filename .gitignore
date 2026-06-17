@@ -16,3 +16,4 @@ run/
 static/*
 src/key/*
 .opencode/
+.mavis/
