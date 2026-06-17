@@ -77,6 +77,34 @@ export class AuthController {
   }
 
   /**
+   * 更新当前用户资料
+   * Body: { name?, avanter?, company?, userGroup? }
+   */
+  @Post('/updateProfile', { middleware: ['tokenParse'] })
+  async updateProfile(@Body(ALL) body: { name?: string; avanter?: string; company?: string; userGroup?: string; user?: Uart.UserInfo }) {
+    const me = (body as any).user as Uart.UserInfo
+    const patch: any = { ...body }
+    delete patch.user
+    const u = await this.UserService.updateProfile(me, patch)
+    if (!u) throw new Error('用户不存在')
+    u.passwd = ''
+    return { code: 200, data: u.toJSON() }
+  }
+
+  /**
+   * 修改当前用户密码
+   * Body: { oldPass, newPass }
+   */
+  @Post('/changePassword', { middleware: ['tokenParse'] })
+  async changePassword(@Body(ALL) body: { oldPass: string; newPass: string; user?: Uart.UserInfo }) {
+    if (!body || !body.oldPass || !body.newPass) {
+      throw new Error('参数不完整')
+    }
+    await this.UserService.changePassword(body.user!, body.oldPass, body.newPass)
+    return { code: 200, msg: '密码修改成功' }
+  }
+
+  /**
    * 微信登录
    * @param data
    */
