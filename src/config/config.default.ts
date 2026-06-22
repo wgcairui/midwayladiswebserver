@@ -1,9 +1,17 @@
 import { ConnectOptions } from 'mongoose';
 
+// Mongo host 解析顺序：
+//   1. MONGO_HOST env（compose 切流量时显式注入，例如 'mongo6' / 'mongo'）
+//   2. NODE_Docker === 'docker' 时默认连 compose 服务名 'mongo'（5.x 老实例）
+//   3. 否则连本机 127.0.0.1（裸机 / 本地开发）
+//
+// 之所以改成读 env：2026-06 跟 midwayuartserver 一起把 db 从 mongo5 迁到 mongo6，
+// 通过 MONGO_HOST 切流量，不需要再为每个 compose 服务改源码。
+const mongoHost = process.env.MONGO_HOST
+  || (process.env.NODE_Docker === 'docker' ? 'mongo' : '127.0.0.1');
+
 export const mongoose = {
-  uri: `mongodb://${
-    process.env.NODE_Docker === 'docker' ? 'mongo' : '127.0.0.1'
-  }:27017/ladis`,
+  uri: `mongodb://${mongoHost}:27017/ladis`,
   options: {
     dbName: 'ladis',
     /* useCreateIndex: true, */
