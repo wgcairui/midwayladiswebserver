@@ -1,5 +1,6 @@
 import { Init, Inject, Provide } from '@midwayjs/decorator';
 import { ReturnModelType, getModelForClass, types } from '@typegoose/typegoose';
+import * as crypto from 'crypto';
 import { User } from '../entity/user';
 import { Util } from '../util/util';
 
@@ -60,17 +61,23 @@ export class UserService {
    * @param user 当前用户
    * @param oldPass 旧明文密码
    * @param newPass 新明文密码
+   *
+   * 注意：存储格式必须与登录流程一致 — `Util.Crypto_Encrypto(md5(plaintext))`。
+   * 登录那边前端在 `ladis-admin/pages/login.vue` 把 passwd `md5()` 后发上来，
+   * 所以比对/写入都要在 server 端补一次 md5，否则改了反而登不上。
    */
   async changePassword(user: Uart.UserInfo, oldPass: string, newPass: string) {
     const u = await this.userModel.findOne({ user: user.user })
     if (!u) throw new Error('用户不存在')
-    if (u.passwd !== this.Util.Crypto_Encrypto(oldPass)) {
+    const oldMd5 = crypto.createHash('md5').update(oldPass).digest('hex')
+    if (u.passwd !== this.Util.Crypto_Encrypto(oldMd5)) {
       throw new Error('旧密码不正确')
     }
     if (!newPass || newPass.length < 6) {
       throw new Error('新密码至少 6 位')
     }
-    u.passwd = this.Util.Crypto_Encrypto(newPass)
+    const newMd5 = crypto.createHash('md5').update(newPass).digest('hex')
+    u.passwd = this.Util.Crypto_Encrypto(newMd5)
     await u.save()
     return true
   }
